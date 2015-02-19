@@ -1,8 +1,48 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     tools:context=".MyActivity" >
+
+    <item
+        android:id="@+id/upload"
+        android:title="@string/upload"
+        android:icon="@android:drawable/ic_menu_gallery"
+        android:showAsAction="always"
+        android:onClick="upload"/>
+
+    <item
+        android:id="@+id/camera"
+        android:title="@string/camera"
+        android:icon="@android:drawable/ic_menu_camera"
+        android:showAsAction="always"
+        android:onClick="takePhotoAndUpload"/>
+
+    <item
+        android:id="@+id/ch1"
+        android:title="Chapter 1"
+        android:showAsAction="never"
+        android:onClick="chapter1"/>
+
+    <item
+        android:id="@+id/ch2"
+        android:title="Chapter 2"
+        android:showAsAction="never"
+        android:onClick="chapter2"/>
+
+    <item
+        android:id="@+id/ch3"
+        android:title="Chapter 3"
+        android:showAsAction="never"
+        android:onClick="chapter3"/>
+
+    <item
+        android:id="@+id/ch4"
+        android:title="Chapter 4"
+        android:showAsAction="never"
+        android:onClick="chapter4"/>
+
     <item android:id="@+id/action_settings"
         android:title="@string/action_settings"
         android:orderInCategory="100"
         android:showAsAction="never" />
+
 </menu>
