@@ -2,7 +2,14 @@
 <resources>
 
     <string name="app_name">MobDIP</string>
-    <string name="letsdoit">Let\'s code some android stuffidy stuff here</string>
     <string name="action_settings">Settings</string>
+
+    <!-- MAIN MENU -->
+    <string name="upload">Upload image</string>
+    <string name="camera">Take photo</string>
+    <string name="ch1">Chapter 1</string>
+    <string name="ch2">Chapter 2</string>
+    <string name="ch3">Chapter 3</string>
+    <string name="ch4">Chapter 4</string>
 
 </resources>
