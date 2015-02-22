@@ -1,7 +1,6 @@
 package com.dip.mob.mobdip;
 
 import android.app.Activity;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Bitmap;
@@ -10,13 +9,22 @@ import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
 import android.provider.MediaStore;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.view.View;
 import android.widget.ImageView;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
+
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 
 public class MyActivity extends Activity{
@@ -27,6 +35,49 @@ public class MyActivity extends Activity{
     private Bitmap chosenImage = null;
     private static final int IMAGE_CHOSEN = 1;
     private TextView title, welcome;
+
+    private static final int CAMERA_DATA = 2;
+    private Uri outputFileUri;
+    private String mCurrentPhotoPath;
+
+    private void dispatchTakePictureIntent() {
+        Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+        // Ensure that there's a camera activity to handle the intent
+        if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
+            // Create the File where the photo should go
+            File photoFile = null;
+            try {
+                photoFile = createImageFile();
+                outputFileUri = Uri.fromFile(photoFile);
+            } catch (IOException ex) {
+                // Error occurred while creating the File
+                ex.printStackTrace();
+            }
+            // Continue only if the File was successfully created
+            if (photoFile != null) {
+                takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT,
+                        Uri.fromFile(photoFile));
+                startActivityForResult(takePictureIntent, CAMERA_DATA);
+            }
+        }
+    }
+
+    private File createImageFile() throws IOException {
+        // Create an image file name
+        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
+        String imageFileName = "JPEG_" + timeStamp + "_";
+        File storageDir = Environment.getExternalStoragePublicDirectory(
+                Environment.DIRECTORY_PICTURES);
+        File image = File.createTempFile(
+                imageFileName,  /* prefix */
+                ".jpg",         /* suffix */
+                storageDir      /* directory */
+        );
+
+        // Save a file: path for use with ACTION_VIEW intents
+        mCurrentPhotoPath = "file:" + image.getAbsolutePath();
+        return image;
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -50,8 +101,8 @@ public class MyActivity extends Activity{
     }
 
     // take photo and upload it to app
-    public void takePhotoAndUpload(MenuItem m){
-
+    public void takePhotoAndUpload(MenuItem m) {
+        dispatchTakePictureIntent();
     }
 
     // show menu for chapter 1 functionality selection
@@ -103,6 +154,29 @@ public class MyActivity extends Activity{
                     title.setText("");
                     welcome.setText("");
                 }
+                /**
+                 * NEXT CASE DOES NOT WORK PROPERLY. PICTURE IS NOT RETURNED TO THE APP FROM CAMERA!!!
+                 * Perhaps, just automatically open it from gallery
+                 */
+            case CAMERA_DATA :
+                if (requestCode == CAMERA_DATA){
+                    Uri uri = data.getData();
+                    String[] projection = { MediaStore.Images.Media.DATA };
+
+                    Cursor cursor = getContentResolver().query(uri, projection,
+                            null, null, null);
+                    cursor.moveToFirst();
+
+                    int colInd = cursor.getColumnIndex(projection[0]);
+                    String filePath = cursor.getString(colInd);
+                    cursor.close();
+
+                    chosenImage = BitmapFactory.decodeFile(mCurrentPhotoPath);
+                    image = new BitmapDrawable(chosenImage);
+                    theImage.setImageDrawable(image);
+                    title.setText("");
+                    welcome.setText("");
+                }
         }
     }
 
@@ -147,7 +221,7 @@ public class MyActivity extends Activity{
                 upload(item);
                 return true;
             case R.id.camera:
-                //takePhotoAndUpload();
+                takePhotoAndUpload(camera);
                 return true;
             case R.id.ch1:
                 //chapter1();
