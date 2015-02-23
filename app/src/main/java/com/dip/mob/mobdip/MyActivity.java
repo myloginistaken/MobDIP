@@ -14,9 +14,18 @@ import android.provider.MediaStore;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.Toast;
+
+import com.yvelabs.satellitemenu.AbstractAnimation;
+import com.yvelabs.satellitemenu.DefaultAnimation;
+import com.yvelabs.satellitemenu.MainActivity;
+import com.yvelabs.satellitemenu.SatelliteItemModel;
+import com.yvelabs.satellitemenu.SatelliteMenu;
+import com.yvelabs.satellitemenu.SettingPara;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -24,6 +33,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 
 
@@ -40,49 +50,45 @@ public class MyActivity extends Activity{
     private Uri outputFileUri;
     private String mCurrentPhotoPath;
 
-    private void dispatchTakePictureIntent() {
-        Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-        // Ensure that there's a camera activity to handle the intent
-        if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
-            // Create the File where the photo should go
-            File photoFile = null;
-            try {
-                photoFile = createImageFile();
-                outputFileUri = Uri.fromFile(photoFile);
-            } catch (IOException ex) {
-                // Error occurred while creating the File
-                ex.printStackTrace();
-            }
-            // Continue only if the File was successfully created
-            if (photoFile != null) {
-                takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT,
-                        Uri.fromFile(photoFile));
-                startActivityForResult(takePictureIntent, CAMERA_DATA);
-            }
-        }
-    }
+    private SatelliteMenu satelliteMenu;
+    private ArrayList<SatelliteItemModel> satllites;
 
-    private File createImageFile() throws IOException {
-        // Create an image file name
-        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
-        String imageFileName = "JPEG_" + timeStamp + "_";
-        File storageDir = Environment.getExternalStoragePublicDirectory(
-                Environment.DIRECTORY_PICTURES);
-        File image = File.createTempFile(
-                imageFileName,  /* prefix */
-                ".jpg",         /* suffix */
-                storageDir      /* directory */
-        );
 
-        // Save a file: path for use with ACTION_VIEW intents
-        mCurrentPhotoPath = "file:" + image.getAbsolutePath();
-        return image;
-    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_my);
+
+        satelliteMenu = (SatelliteMenu) this.findViewById(R.id.satellite_menu);
+
+        satllites = new ArrayList<SatelliteItemModel>();
+        satllites.add(new SatelliteItemModel(1, R.drawable.satellite_1));
+        satllites.add(new SatelliteItemModel(2, R.drawable.satellite_1));
+        satllites.add(new SatelliteItemModel(3, R.drawable.satellite_1));
+        satllites.add(new SatelliteItemModel(4, R.drawable.satellite_1));
+        satllites.add(new SatelliteItemModel(5, R.drawable.satellite_1));
+
+        SettingPara para = new SettingPara(90, 270, 200, R.drawable.planet_menu, satllites);
+
+        AbstractAnimation anim = new DefaultAnimation();
+        para.setMenuAnimation(anim);
+
+        try {
+            satelliteMenu.setting(para);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        satelliteMenu.setOnSatelliteClickedListener(new SatelliteMenu.OnSatelliteClickedListener() {
+            @Override
+            public void onClick(View v) {
+                String a = "getLeft: " + v.getLeft() + ", getTop: "
+                        + v.getTop() + ", getRight: " + v.getRight()
+                        + ", getBottom: " + v.getBottom();
+                Toast.makeText(MyActivity.this, a, Toast.LENGTH_SHORT).show();
+            }
+        });
 
         theImage = (ImageView) findViewById(R.id.image);
         title = (TextView) findViewById(R.id.textView);
@@ -129,6 +135,45 @@ public class MyActivity extends Activity{
         Intent toGallery = new Intent(Intent.ACTION_PICK,
                 android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
         startActivityForResult(toGallery, IMAGE_CHOSEN);
+    }
+
+    private void dispatchTakePictureIntent() {
+        Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+        // Ensure that there's a camera activity to handle the intent
+        if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
+            // Create the File where the photo should go
+            File photoFile = null;
+            try {
+                photoFile = createImageFile();
+                outputFileUri = Uri.fromFile(photoFile);
+            } catch (IOException ex) {
+                // Error occurred while creating the File
+                ex.printStackTrace();
+            }
+            // Continue only if the File was successfully created
+            if (photoFile != null) {
+                takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT,
+                        Uri.fromFile(photoFile));
+                startActivityForResult(takePictureIntent, CAMERA_DATA);
+            }
+        }
+    }
+
+    private File createImageFile() throws IOException {
+        // Create an image file name
+        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
+        String imageFileName = "JPEG_" + timeStamp + "_";
+        File storageDir = Environment.getExternalStoragePublicDirectory(
+                Environment.DIRECTORY_PICTURES);
+        File image = File.createTempFile(
+                imageFileName,  /* prefix */
+                ".jpg",         /* suffix */
+                storageDir      /* directory */
+        );
+
+        // Save a file: path for use with ACTION_VIEW intents
+        mCurrentPhotoPath = "file:" + image.getAbsolutePath();
+        return image;
     }
 
     // Get selected photo
