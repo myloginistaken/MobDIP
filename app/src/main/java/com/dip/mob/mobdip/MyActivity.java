@@ -16,21 +16,16 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.yvelabs.satellitemenu.AbstractAnimation;
 import com.yvelabs.satellitemenu.DefaultAnimation;
-import com.yvelabs.satellitemenu.MainActivity;
 import com.yvelabs.satellitemenu.SatelliteItemModel;
 import com.yvelabs.satellitemenu.SatelliteMenu;
 import com.yvelabs.satellitemenu.SettingPara;
 
-import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -42,6 +37,7 @@ public class MyActivity extends Activity{
     private MenuItem upload, camera, ch1, ch2, ch3, ch4;
     private Drawable image;
     private ImageView theImage;
+
     private Bitmap chosenImage = null;
     private static final int IMAGE_CHOSEN = 1;
     private TextView title, welcome;
@@ -52,6 +48,9 @@ public class MyActivity extends Activity{
 
     private SatelliteMenu satelliteMenu;
     private ArrayList<SatelliteItemModel> satllites;
+
+    // Chapter 1 selected onCreate by default
+    private int chapterSelected = 1;
 
 
 
@@ -69,10 +68,11 @@ public class MyActivity extends Activity{
         satllites.add(new SatelliteItemModel(4, R.drawable.satellite_1));
         satllites.add(new SatelliteItemModel(5, R.drawable.satellite_1));
 
-        SettingPara para = new SettingPara(90, 270, 200, R.drawable.planet_menu, satllites);
+        SettingPara para = new SettingPara(0, 90, 300, R.drawable.planet_menu, satllites);
 
         AbstractAnimation anim = new DefaultAnimation();
         para.setMenuAnimation(anim);
+        para.setPlanetPosition(SettingPara.POSITION_BOTTOM_LEFT);
 
         try {
             satelliteMenu.setting(para);
@@ -181,7 +181,7 @@ public class MyActivity extends Activity{
         super.onActivityResult(requestCode, resultCode, data);
         switch (requestCode) {
             case IMAGE_CHOSEN:
-                if (requestCode == IMAGE_CHOSEN) {
+                if (requestCode == IMAGE_CHOSEN && data!=null){
                     Uri uri = data.getData();
                     String[] projection = { MediaStore.Images.Media.DATA };
 
