@@ -11,6 +11,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -162,9 +163,15 @@ public class MyActivity extends Activity{
     private File createImageFile() throws IOException {
         // Create an image file name
         String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
-        String imageFileName = "JPEG_" + timeStamp + "_";
-        File storageDir = Environment.getExternalStoragePublicDirectory(
-                Environment.DIRECTORY_PICTURES);
+        String imageFileName = "IMG_" + timeStamp + "_";
+        File storageDir = new File(Environment.getExternalStoragePublicDirectory(
+                Environment.DIRECTORY_DCIM), "MobDIP");
+        if (!storageDir.exists()) {
+            if (!storageDir.mkdirs()) {
+                Log.d("Directory name", "failed to create directory");
+                return null;
+            }
+        }
         File image = File.createTempFile(
                 imageFileName,  /* prefix */
                 ".jpg",         /* suffix */
@@ -205,6 +212,35 @@ public class MyActivity extends Activity{
                  */
             case CAMERA_DATA :
                 if (requestCode == CAMERA_DATA){
+                    // Find the last picture
+                    String[] projection = new String[]{
+                            MediaStore.Images.ImageColumns._ID,
+                            MediaStore.Images.ImageColumns.DATA,
+                            MediaStore.Images.ImageColumns.BUCKET_DISPLAY_NAME,
+                            MediaStore.Images.ImageColumns.DATE_TAKEN,
+                            MediaStore.Images.ImageColumns.MIME_TYPE
+                    };
+                    final Cursor cursor = getContentResolver()
+                            .query(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, projection, null,
+                                    null, MediaStore.Images.ImageColumns.DATE_TAKEN + " DESC");
+
+                    // Put it in the image view
+                    if (cursor.moveToFirst()) {
+                        final ImageView imageView = (ImageView) findViewById(R.id.image);
+                        String imageLocation = cursor.getString(1);
+                        File imageFile = new File(imageLocation);
+                        if (imageFile.exists()) {   // TODO: is there a better way to do this?
+                            Bitmap bm = BitmapFactory.decodeFile(imageLocation);
+                            imageView.setImageBitmap(bm);
+                        }
+                    }
+                    title.setText("");
+                    welcome.setText("");
+                }
+
+
+            /*case CAMERA_DATA :
+                if (requestCode == CAMERA_DATA){
                     Uri uri = data.getData();
                     String[] projection = { MediaStore.Images.Media.DATA };
 
@@ -216,12 +252,13 @@ public class MyActivity extends Activity{
                     String filePath = cursor.getString(colInd);
                     cursor.close();
 
-                    chosenImage = BitmapFactory.decodeFile(mCurrentPhotoPath);
+                    chosenImage = BitmapFactory.decodeFile(filePath);
                     image = new BitmapDrawable(chosenImage);
                     theImage.setImageDrawable(image);
                     title.setText("");
                     welcome.setText("");
                 }
+                */
         }
     }
 
