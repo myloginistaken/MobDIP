@@ -206,10 +206,7 @@ public class MyActivity extends Activity{
                     title.setText("");
                     welcome.setText("");
                 }
-                /**
-                 * NEXT CASE DOES NOT WORK PROPERLY. PICTURE IS NOT RETURNED TO THE APP FROM CAMERA!!!
-                 * Perhaps, just automatically open it from gallery
-                 */
+            //TODO: Photo from gallery or from MobDIP? Is it the suitable way? Why do we do it differently than in IMAGE_CHOSEN case?
             case CAMERA_DATA :
                 if (requestCode == CAMERA_DATA){
                     // Find the last picture
@@ -229,7 +226,7 @@ public class MyActivity extends Activity{
                         final ImageView imageView = (ImageView) findViewById(R.id.image);
                         String imageLocation = cursor.getString(1);
                         File imageFile = new File(imageLocation);
-                        if (imageFile.exists()) {   // TODO: is there a better way to do this?
+                        if (imageFile.exists()) {
                             Bitmap bm = BitmapFactory.decodeFile(imageLocation);
                             imageView.setImageBitmap(bm);
                         }
@@ -237,28 +234,6 @@ public class MyActivity extends Activity{
                     title.setText("");
                     welcome.setText("");
                 }
-
-
-            /*case CAMERA_DATA :
-                if (requestCode == CAMERA_DATA){
-                    Uri uri = data.getData();
-                    String[] projection = { MediaStore.Images.Media.DATA };
-
-                    Cursor cursor = getContentResolver().query(uri, projection,
-                            null, null, null);
-                    cursor.moveToFirst();
-
-                    int colInd = cursor.getColumnIndex(projection[0]);
-                    String filePath = cursor.getString(colInd);
-                    cursor.close();
-
-                    chosenImage = BitmapFactory.decodeFile(filePath);
-                    image = new BitmapDrawable(chosenImage);
-                    theImage.setImageDrawable(image);
-                    title.setText("");
-                    welcome.setText("");
-                }
-                */
         }
     }
 
