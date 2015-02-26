@@ -156,7 +156,19 @@ public class MyActivity extends Activity{
         });
         */
         gallery = (Button) findViewById(R.id.gallery_button);
+        gallery.setOnClickListener(new Button.OnClickListener() {
+            public void onClick(View v) {
+                upload();
+            }
+        });
+
         camera = (Button) findViewById(R.id.camera_button);
+        camera.setOnClickListener(new Button.OnClickListener() {
+            public void onClick(View v) {
+                dispatchTakePictureIntent();
+            }
+        });
+
         theImage = (ImageView) findViewById(R.id.image);
         relativeLayout=(RelativeLayout) this.findViewById(R.id.relativeLayout);
         title = (TextView) findViewById(R.id.textView);
@@ -198,7 +210,7 @@ public class MyActivity extends Activity{
         // upload picture from gallery
 
         // Go to gallery
-        public void upload(MenuItem mi) {
+        public void upload() {
             Intent toGallery = new Intent(Intent.ACTION_PICK,
                     android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
             startActivityForResult(toGallery, IMAGE_CHOSEN);
