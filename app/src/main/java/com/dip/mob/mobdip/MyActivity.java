@@ -7,6 +7,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
+import android.graphics.drawable.ScaleDrawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
@@ -17,6 +18,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -37,7 +39,7 @@ public class MyActivity extends Activity{
 
     private MenuItem upload, camera, ch1, ch2, ch3, ch4;
     private Drawable image;
-    private ImageView theImage;
+    private ScaleDrawable sc;
 
     private Bitmap chosenImage = null;
     private static final int IMAGE_CHOSEN = 1;
@@ -50,6 +52,10 @@ public class MyActivity extends Activity{
     private SatelliteMenu satelliteMenu;
     private ArrayList<SatelliteItemModel> satllites;
 
+
+    //added by Joey
+    private RelativeLayout relativeLayout;
+
     // Chapter 1 selected onCreate by default
     private int chapterSelected = 1;
 
@@ -60,7 +66,8 @@ public class MyActivity extends Activity{
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_my);
 
-        satelliteMenu = (SatelliteMenu) this.findViewById(R.id.satellite_menu);
+
+        satelliteMenu = (SatelliteMenu) findViewById(R.id.satellite_menu);
 
         satllites = new ArrayList<SatelliteItemModel>();
         satllites.add(new SatelliteItemModel(1, R.drawable.satellite_1));
@@ -91,17 +98,24 @@ public class MyActivity extends Activity{
             }
         });
 
-        theImage = (ImageView) findViewById(R.id.image);
+
+
+        relativeLayout=(RelativeLayout) this.findViewById(R.id.relativeLayout);
+
+
         title = (TextView) findViewById(R.id.textView);
         welcome = (TextView) findViewById(R.id.textView2);
 
         if(savedInstanceState != null){
             chosenImage = savedInstanceState.getParcelable("image");
             image = new BitmapDrawable(chosenImage);
-            theImage.setImageDrawable(image);
+            sc = new ScaleDrawable(image,17,1,1);
+            relativeLayout.setBackgroundDrawable(sc);
+
         }
 
-        if(theImage.getDrawable()==null){
+        if(relativeLayout.getBackground() == null){ //theImage.getDrawable()
+
             title.setText("MobDIP");
             welcome.setText("Welcome to Digital Image Processing App");
         }
@@ -202,7 +216,7 @@ public class MyActivity extends Activity{
 
                     chosenImage = BitmapFactory.decodeFile(filePath);
                     image = new BitmapDrawable(chosenImage);
-                    theImage.setImageDrawable(image);
+                    relativeLayout.setBackgroundDrawable(image);
                     title.setText("");
                     welcome.setText("");
                 }
@@ -223,12 +237,14 @@ public class MyActivity extends Activity{
 
                     // Put it in the image view
                     if (cursor.moveToFirst()) {
-                        final ImageView imageView = (ImageView) findViewById(R.id.image);
+                        final RelativeLayout relativeLayout = (RelativeLayout) findViewById(R.id.relativeLayout);
                         String imageLocation = cursor.getString(1);
                         File imageFile = new File(imageLocation);
                         if (imageFile.exists()) {
                             Bitmap bm = BitmapFactory.decodeFile(imageLocation);
-                            imageView.setImageBitmap(bm);
+                            bm.setDensity(Bitmap.DENSITY_NONE);
+                            image = new BitmapDrawable(bm);
+                            relativeLayout.setBackgroundDrawable(image);
                         }
                     }
                     title.setText("");
@@ -250,7 +266,7 @@ public class MyActivity extends Activity{
 
         chosenImage = savedInstanceState.getParcelable("image");
         image = new BitmapDrawable(chosenImage);
-        theImage.setImageDrawable(image);
+        relativeLayout.setBackgroundDrawable(image);
 
 
     }
