@@ -1,7 +1,10 @@
 package com.dip.mob.mobdip;
 
 import android.app.Activity;
+import android.app.Fragment;
+import android.app.FragmentManager;
 import android.content.Intent;
+import android.content.res.TypedArray;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -11,14 +14,15 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
+import android.support.v4.widget.DrawerLayout;
 import android.util.Log;
-import android.view.Menu;
-import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.AdapterView;
+import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.ListView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.yvelabs.satellitemenu.AbstractAnimation;
 import com.yvelabs.satellitemenu.DefaultAnimation;
@@ -35,7 +39,7 @@ import java.util.Date;
 
 public class MyActivity extends Activity{
 
-    private MenuItem upload, camera, ch1, ch2, ch3, ch4;
+    private Button gallery, camera;
     private Drawable image;
     private ImageView theImage;
 
@@ -47,10 +51,28 @@ public class MyActivity extends Activity{
     private Uri outputFileUri;
     private String mCurrentPhotoPath;
 
-    private SatelliteMenu satelliteMenu;
-    private ArrayList<SatelliteItemModel> satllites;
+    //Drawer Navigation Menu
+    private DrawerLayout mDrawerLayout;
+    private ListView mDrawerList;
+
+    // nav drawer title
+    private CharSequence mDrawerTitle;
+
+    // used to store app title
+    private CharSequence mTitle;
+
+    // slide menu items
+    private String[] navMenuTitles;
+    private TypedArray navMenuIcons;
+
+    private ArrayList<NavDrawerItem> navDrawerItems;
+    private NavDrawerListAdapter adapter;
+
+    //private SatelliteMenu satelliteMenu;
+    //private ArrayList<SatelliteItemModel> satllites;
 
     // Chapter 1 selected onCreate by default
+    //NO!
     private int chapterSelected = 1;
 
 
@@ -60,7 +82,41 @@ public class MyActivity extends Activity{
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_my);
 
-        satelliteMenu = (SatelliteMenu) this.findViewById(R.id.satellite_menu);
+        mTitle = mDrawerTitle = getTitle();
+
+        // load slide menu items
+        navMenuTitles = getResources().getStringArray(R.array.nav_drawer_items);
+
+        mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
+        mDrawerList = (ListView) findViewById(R.id.list_slidermenu);
+
+        navDrawerItems = new ArrayList<NavDrawerItem>();
+
+        // adding nav drawer items to array
+        // Chapter 1
+        navDrawerItems.add(new NavDrawerItem(navMenuTitles[0]));
+        // Chapter 2
+        navDrawerItems.add(new NavDrawerItem(navMenuTitles[1]));
+        // Chapter 3
+        navDrawerItems.add(new NavDrawerItem(navMenuTitles[2]));
+        // Chapter 4
+        navDrawerItems.add(new NavDrawerItem(navMenuTitles[3]));
+        // Chapter 5
+        navDrawerItems.add(new NavDrawerItem(navMenuTitles[4]));
+        // Chapter 6
+        navDrawerItems.add(new NavDrawerItem(navMenuTitles[5]));
+
+        // setting the nav drawer list adapter
+        adapter = new NavDrawerListAdapter(getApplicationContext(),
+                navDrawerItems);
+        mDrawerList.setAdapter(adapter);
+
+        if (savedInstanceState == null) {
+            // on first time display view for first nav item
+            displayView(0);
+        }
+
+        /*satelliteMenu = (SatelliteMenu) this.findViewById(R.id.satellite_menu);
 
         satllites = new ArrayList<SatelliteItemModel>();
         satllites.add(new SatelliteItemModel(1, R.drawable.satellite_1));
@@ -90,7 +146,9 @@ public class MyActivity extends Activity{
                 Toast.makeText(MyActivity.this, a, Toast.LENGTH_SHORT).show();
             }
         });
-
+        */
+        gallery = (Button) findViewById(R.id.gallery_button);
+        camera = (Button) findViewById(R.id.camera_button);
         theImage = (ImageView) findViewById(R.id.image);
         title = (TextView) findViewById(R.id.textView);
         welcome = (TextView) findViewById(R.id.textView2);
@@ -107,81 +165,77 @@ public class MyActivity extends Activity{
         }
     }
 
-    // take photo and upload it to app
-    public void takePhotoAndUpload(MenuItem m) {
-        dispatchTakePictureIntent();
-    }
-
-    // show menu for chapter 1 functionality selection
-    public void chapter1(MenuItem m){
-
-    }
-
-    public void chapter2(MenuItem m){
-
-    }
-
-    public void chapter3(MenuItem m){
-
-    }
-
-    public void chapter4(MenuItem m){
-
-    }
-
-    // upload picture from gallery
-
-    // Go to gallery
-    public void upload(MenuItem mi) {
-        Intent toGallery = new Intent(Intent.ACTION_PICK,
-                android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
-        startActivityForResult(toGallery, IMAGE_CHOSEN);
-    }
-
-    private void dispatchTakePictureIntent() {
-        Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-        // Ensure that there's a camera activity to handle the intent
-        if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
-            // Create the File where the photo should go
-            File photoFile = null;
-            try {
-                photoFile = createImageFile();
-                outputFileUri = Uri.fromFile(photoFile);
-            } catch (IOException ex) {
-                // Error occurred while creating the File
-                ex.printStackTrace();
-            }
-            // Continue only if the File was successfully created
-            if (photoFile != null) {
-                takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT,
-                        Uri.fromFile(photoFile));
-                startActivityForResult(takePictureIntent, CAMERA_DATA);
-            }
+    /**
+     * Slide menu item click listener
+     * */
+    private class SlideMenuClickListener implements
+            ListView.OnItemClickListener {
+        @Override
+        public void onItemClick(AdapterView<?> parent, View view, int position,
+                                long id) {
+            // display view for selected nav drawer item
+            displayView(position);
         }
     }
 
-    private File createImageFile() throws IOException {
-        // Create an image file name
-        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
-        String imageFileName = "IMG_" + timeStamp + "_";
-        File storageDir = new File(Environment.getExternalStoragePublicDirectory(
-                Environment.DIRECTORY_DCIM), "MobDIP");
-        if (!storageDir.exists()) {
-            if (!storageDir.mkdirs()) {
-                Log.d("Directory name", "failed to create directory");
-                return null;
+        // take photo and upload it to app
+        public void takePhotoAndUpload(MenuItem m) {
+            dispatchTakePictureIntent();
+        }
+
+        // upload picture from gallery
+
+        // Go to gallery
+        public void upload(MenuItem mi) {
+            Intent toGallery = new Intent(Intent.ACTION_PICK,
+                    android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+            startActivityForResult(toGallery, IMAGE_CHOSEN);
+        }
+
+        private void dispatchTakePictureIntent() {
+            Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+            // Ensure that there's a camera activity to handle the intent
+            if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
+                // Create the File where the photo should go
+                File photoFile = null;
+                try {
+                    photoFile = createImageFile();
+                    outputFileUri = Uri.fromFile(photoFile);
+                } catch (IOException ex) {
+                    // Error occurred while creating the File
+                    ex.printStackTrace();
+                }
+                // Continue only if the File was successfully created
+                if (photoFile != null) {
+                    takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT,
+                            Uri.fromFile(photoFile));
+                    startActivityForResult(takePictureIntent, CAMERA_DATA);
+                }
             }
         }
-        File image = File.createTempFile(
-                imageFileName,  /* prefix */
-                ".jpg",         /* suffix */
-                storageDir      /* directory */
-        );
 
-        // Save a file: path for use with ACTION_VIEW intents
-        mCurrentPhotoPath = "file:" + image.getAbsolutePath();
-        return image;
-    }
+        private File createImageFile() throws IOException {
+            // Create an image file name
+            String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
+            String imageFileName = "IMG_" + timeStamp + "_";
+            File storageDir = new File(Environment.getExternalStoragePublicDirectory(
+                    Environment.DIRECTORY_DCIM), "MobDIP");
+            if (!storageDir.exists()) {
+                if (!storageDir.mkdirs()) {
+                    Log.d("Directory name", "failed to create directory");
+                    return null;
+                }
+            }
+            File image = File.createTempFile(
+                    imageFileName,  /* prefix */
+                    ".jpg",         /* suffix */
+                    storageDir      /* directory */
+            );
+
+            // Save a file: path for use with ACTION_VIEW intents
+            mCurrentPhotoPath = "file:" + image.getAbsolutePath();
+            return image;
+        }
 
     // Get selected photo
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -252,39 +306,46 @@ public class MyActivity extends Activity{
         image = new BitmapDrawable(chosenImage);
         theImage.setImageDrawable(image);
 
-
     }
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        MenuInflater inflater = getMenuInflater();
-        inflater.inflate(R.menu.my, menu);
-
-        upload = menu.findItem(R.id.upload);
-        camera = menu.findItem(R.id.camera);
-        ch1 = menu.findItem(R.id.ch1);
-        ch2 = menu.findItem(R.id.ch2);
-        ch3 = menu.findItem(R.id.ch3);
-        ch4 = menu.findItem(R.id.ch4);
-
-        return super.onPrepareOptionsMenu(menu);
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-
-        switch (item.getItemId()) {
-            case R.id.upload:
-                upload(item);
-                return true;
-            case R.id.camera:
-                takePhotoAndUpload(camera);
-                return true;
-            case R.id.ch1:
-                //chapter1();
-                return true;
+    /**
+     * Diplaying fragment view for selected nav drawer list item
+     * */
+    private void displayView(int position) {
+        // update the main content by replacing fragments
+        Fragment fragment = null;
+        switch (position) {
+            case 0:
+                break;
+            case 1:
+                fragment = new Ch1();
+                break;
+            case 2:
+                fragment = new Ch2();
+                break;
+            default:
+                break;
         }
 
-        return super.onOptionsItemSelected(item);
+        if (fragment != null) {
+            FragmentManager fragmentManager = getFragmentManager();
+            fragmentManager.beginTransaction()
+                    .replace(R.id.frame_container, fragment).commit();
+
+            // update selected item and title, then close the drawer
+            mDrawerList.setItemChecked(position, true);
+            mDrawerList.setSelection(position);
+            setTitle(navMenuTitles[position]);
+            mDrawerLayout.closeDrawer(mDrawerList);
+        } else {
+            // error in creating fragment
+            Log.e("MainActivity", "Error in creating fragment");
+        }
+    }
+
+    @Override
+    public void setTitle(CharSequence title) {
+        mTitle = title;
+        getActionBar().setTitle(mTitle);
     }
 }
