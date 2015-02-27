@@ -25,6 +25,7 @@ import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.yvelabs.satellitemenu.AbstractAnimation;
 import com.yvelabs.satellitemenu.DefaultAnimation;
@@ -45,10 +46,11 @@ public class MyActivity extends Activity{
     private Drawable image;
     private ScaleDrawable sc;
     private ImageView theImage;
+    private boolean imageSet = false;
 
     private Bitmap chosenImage = null;
     private static final int IMAGE_CHOSEN = 1;
-    private TextView title, welcome;
+    private TextView title, welcome, info;
 
     private static final int CAMERA_DATA = 2;
     private Uri outputFileUri;
@@ -71,8 +73,9 @@ public class MyActivity extends Activity{
     private ArrayList<NavDrawerItem> navDrawerItems;
     private NavDrawerListAdapter adapter;
 
-    //private SatelliteMenu satelliteMenu;
-    //private ArrayList<SatelliteItemModel> satllites;
+    private SatelliteMenu satelliteMenu;
+    private ArrayList<SatelliteItemModel> satllites;
+    private SettingPara para;
 
 
     //added by Joey
@@ -90,7 +93,7 @@ public class MyActivity extends Activity{
         setContentView(R.layout.activity_my);
 
         mTitle = mDrawerTitle = getTitle();
-
+        info = (TextView) findViewById(R.id.textView3);
         // load slide menu items
         navMenuTitles = getResources().getStringArray(R.array.nav_drawer_items);
 
@@ -123,21 +126,21 @@ public class MyActivity extends Activity{
             displayView(0);
         }
 
-        /*satelliteMenu = (SatelliteMenu) this.findViewById(R.id.satellite_menu);
+        satelliteMenu = (SatelliteMenu) this.findViewById(R.id.satellite_menu);
         satelliteMenu = (SatelliteMenu) findViewById(R.id.satellite_menu);
 
         satllites = new ArrayList<SatelliteItemModel>();
-        satllites.add(new SatelliteItemModel(1, R.drawable.satellite_1));
-        satllites.add(new SatelliteItemModel(2, R.drawable.satellite_1));
-        satllites.add(new SatelliteItemModel(3, R.drawable.satellite_1));
-        satllites.add(new SatelliteItemModel(4, R.drawable.satellite_1));
-        satllites.add(new SatelliteItemModel(5, R.drawable.satellite_1));
+        satllites.add(new SatelliteItemModel(1, android.R.drawable.ic_menu_gallery));
+        satllites.add(new SatelliteItemModel(2, android.R.drawable.ic_menu_camera));
+        satllites.add(new SatelliteItemModel(3, android.R.drawable.ic_menu_info_details));
 
-        SettingPara para = new SettingPara(0, 90, 300, R.drawable.planet_menu, satllites);
+
+        para = new SettingPara(0, 180, 300, R.drawable.planet_menu, satllites);
+        para.setPlanetPosition(SettingPara.POSITION_BOTTOM_CENTER);
+
 
         AbstractAnimation anim = new DefaultAnimation();
         para.setMenuAnimation(anim);
-        para.setPlanetPosition(SettingPara.POSITION_BOTTOM_LEFT);
 
         try {
             satelliteMenu.setting(para);
@@ -148,26 +151,25 @@ public class MyActivity extends Activity{
         satelliteMenu.setOnSatelliteClickedListener(new SatelliteMenu.OnSatelliteClickedListener() {
             @Override
             public void onClick(View v) {
-                String a = "getLeft: " + v.getLeft() + ", getTop: "
+                switch (v.getRight()) {
+                    case 540:
+                        dispatchTakePictureIntent();
+                        break;
+                    case 840:
+                        upload();
+                        break;
+                    case 240:
+                        info.setText("This app has been developed by a magic trio in order to illustrate different image processing techniques learnt in the course Digital Image Processing");
+                }
+                /*
+                String a = "ID: " + v.getId() + ", getTop: "
                         + v.getTop() + ", getRight: " + v.getRight()
                         + ", getBottom: " + v.getBottom();
-                Toast.makeText(MyActivity.this, a, Toast.LENGTH_SHORT).show();
-            }
-        });
-        */
-        gallery = (Button) findViewById(R.id.gallery_button);
-        gallery.setOnClickListener(new Button.OnClickListener() {
-            public void onClick(View v) {
-                upload();
+                Toast.makeText(MyActivity.this, a, Toast.LENGTH_SHORT).show();*/
             }
         });
 
-        camera = (Button) findViewById(R.id.camera_button);
-        camera.setOnClickListener(new Button.OnClickListener() {
-            public void onClick(View v) {
-                dispatchTakePictureIntent();
-            }
-        });
+
 
         theImage = (ImageView) findViewById(R.id.image);
         relativeLayout=(RelativeLayout) this.findViewById(R.id.relativeLayout);
@@ -214,6 +216,7 @@ public class MyActivity extends Activity{
             Intent toGallery = new Intent(Intent.ACTION_PICK,
                     android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
             startActivityForResult(toGallery, IMAGE_CHOSEN);
+            imageSet = true;
         }
 
         private void dispatchTakePictureIntent() {
@@ -234,6 +237,7 @@ public class MyActivity extends Activity{
                     takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT,
                             Uri.fromFile(photoFile));
                     startActivityForResult(takePictureIntent, CAMERA_DATA);
+                    imageSet = true;
                 }
             }
         }
@@ -283,6 +287,7 @@ public class MyActivity extends Activity{
                     relativeLayout.setBackgroundDrawable(image);
                     title.setText("");
                     welcome.setText("");
+                    info.setText("");
                 }
             //TODO: Photo from gallery or from MobDIP? Is it the suitable way? Why do we do it differently than in IMAGE_CHOSEN case?
             case CAMERA_DATA :
@@ -362,7 +367,7 @@ public class MyActivity extends Activity{
             mDrawerList.setItemChecked(position, true);
             mDrawerList.setSelection(position);
             setTitle(navMenuTitles[position]);
-            mDrawerLayout.closeDrawer(mDrawerList);
+            //mDrawerLayout.closeDrawer(mDrawerList);
         } else {
             // error in creating fragment
             Log.e("MainActivity", "Error in creating fragment");
