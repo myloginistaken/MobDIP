@@ -77,14 +77,11 @@ public class MyActivity extends Activity{
     private ArrayList<SatelliteItemModel> satllites;
     private SettingPara para;
 
-
-    //added by Joey
     private RelativeLayout relativeLayout;
 
     // Chapter 1 selected onCreate by default
     //NO!
     private int chapterSelected = 1;
-
 
 
     @Override
@@ -245,7 +242,7 @@ public class MyActivity extends Activity{
         private File createImageFile() throws IOException {
             // Create an image file name
             String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
-            String imageFileName = "IMG_" + timeStamp + "_";
+            String imageFileName = "DIP_" + timeStamp + "_";
             File storageDir = new File(Environment.getExternalStoragePublicDirectory(
                     Environment.DIRECTORY_DCIM), "MobDIP");
             if (!storageDir.exists()) {
@@ -310,14 +307,15 @@ public class MyActivity extends Activity{
                         String imageLocation = cursor.getString(1);
                         File imageFile = new File(imageLocation);
                         if (imageFile.exists()) {
-                            Bitmap bm = BitmapFactory.decodeFile(imageLocation);
-                            bm.setDensity(Bitmap.DENSITY_NONE);
-                            image = new BitmapDrawable(bm);
+                            chosenImage = BitmapFactory.decodeFile(imageLocation);
+                            chosenImage.setDensity(Bitmap.DENSITY_NONE);
+                            image = new BitmapDrawable(chosenImage);
                             relativeLayout.setBackgroundDrawable(image);
                         }
                     }
                     title.setText("");
                     welcome.setText("");
+                    info.setText("");
                 }
         }
     }
