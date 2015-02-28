@@ -17,6 +17,7 @@ import android.os.Environment;
 import android.provider.MediaStore;
 import android.support.v4.widget.DrawerLayout;
 import android.util.Log;
+import android.util.TypedValue;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
@@ -27,18 +28,15 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.yvelabs.satellitemenu.AbstractAnimation;
-import com.yvelabs.satellitemenu.DefaultAnimation;
-import com.yvelabs.satellitemenu.SatelliteItemModel;
-import com.yvelabs.satellitemenu.SatelliteMenu;
-import com.yvelabs.satellitemenu.SettingPara;
 
 import java.io.File;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
+import android.view.ext.*;
 
 public class MyActivity extends Activity{
 
@@ -73,9 +71,6 @@ public class MyActivity extends Activity{
     private ArrayList<NavDrawerItem> navDrawerItems;
     private NavDrawerListAdapter adapter;
 
-    private SatelliteMenu satelliteMenu;
-    private ArrayList<SatelliteItemModel> satllites;
-    private SettingPara para;
 
     private RelativeLayout relativeLayout;
 
@@ -83,6 +78,7 @@ public class MyActivity extends Activity{
     //NO!
     private int chapterSelected = 1;
 
+    private int vd;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -123,50 +119,37 @@ public class MyActivity extends Activity{
             displayView(0);
         }
 
-        satelliteMenu = (SatelliteMenu) this.findViewById(R.id.satellite_menu);
-        satelliteMenu = (SatelliteMenu) findViewById(R.id.satellite_menu);
+        SatelliteMenu menu = (SatelliteMenu) findViewById(R.id.menu);
 
-        satllites = new ArrayList<SatelliteItemModel>();
-        satllites.add(new SatelliteItemModel(1, android.R.drawable.ic_menu_gallery));
-        satllites.add(new SatelliteItemModel(2, android.R.drawable.ic_menu_camera));
-        satllites.add(new SatelliteItemModel(3, android.R.drawable.ic_menu_info_details));
+//		  Set from XML, possible to programmatically set
+        float distance = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 170, getResources().getDisplayMetrics());
+        menu.setSatelliteDistance((int) distance);
+        menu.setExpandDuration(500);
+        menu.setCloseItemsOnClick(true);
+        menu.setTotalSpacingDegree(120);
 
+        List<SatelliteMenuItem> items = new ArrayList<SatelliteMenuItem>();
+        items.add(new SatelliteMenuItem(1, android.R.drawable.ic_menu_gallery));
+        items.add(new SatelliteMenuItem(2, android.R.drawable.ic_menu_camera));
+        items.add(new SatelliteMenuItem(3, android.R.drawable.ic_menu_info_details));
+        menu.addItems(items);
 
-        para = new SettingPara(0, 180, 300, R.drawable.planet_menu, satllites);
-        para.setPlanetPosition(SettingPara.POSITION_BOTTOM_CENTER);
+        menu.setOnItemClickedListener(new SatelliteMenu.SateliteClickedListener() {
 
-
-        AbstractAnimation anim = new DefaultAnimation();
-        para.setMenuAnimation(anim);
-
-        try {
-            satelliteMenu.setting(para);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        satelliteMenu.setOnSatelliteClickedListener(new SatelliteMenu.OnSatelliteClickedListener() {
-            @Override
-            public void onClick(View v) {
-                switch (v.getRight()) {
-                    case 540:
-                        dispatchTakePictureIntent();
-                        break;
-                    case 840:
+            public void eventOccured(int id) {
+                switch (id){
+                    case 1:
                         upload();
                         break;
-                    case 240:
+                    case 2:
+                        dispatchTakePictureIntent();
+                        break;
+                    case 3:
                         info.setText("This app has been developed by a magic trio in order to illustrate different image processing techniques learnt in the course Digital Image Processing");
                 }
-                /*
-                String a = "ID: " + v.getId() + ", getTop: "
-                        + v.getTop() + ", getRight: " + v.getRight()
-                        + ", getBottom: " + v.getBottom();
-                Toast.makeText(MyActivity.this, a, Toast.LENGTH_SHORT).show();*/
+                //Toast.makeText(MyActivity.this, "Clicked on " + id, Toast.LENGTH_LONG).show();
             }
         });
-
-
 
         theImage = (ImageView) findViewById(R.id.image);
         relativeLayout=(RelativeLayout) this.findViewById(R.id.relativeLayout);
