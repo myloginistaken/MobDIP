@@ -263,6 +263,7 @@ public class MyActivity extends Activity{
         }
 
     // Get selected photo
+    @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         switch (requestCode) {
@@ -338,7 +339,7 @@ public class MyActivity extends Activity{
     }
 
     /**
-     * Diplaying fragment view for selected nav drawer list item
+     * Displaying fragment view for selected nav drawer list item
      * */
     private void displayView(int position) {
         // update the main content by replacing fragments
