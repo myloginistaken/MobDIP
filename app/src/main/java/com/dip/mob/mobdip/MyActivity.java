@@ -8,6 +8,8 @@ import android.content.res.TypedArray;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Matrix;
+import android.graphics.PointF;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.ScaleDrawable;
@@ -19,6 +21,7 @@ import android.support.v4.widget.DrawerLayout;
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.Button;
@@ -26,9 +29,6 @@ import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
-import android.widget.Toast;
-
-
 
 import java.io.File;
 import java.io.IOException;
@@ -46,7 +46,7 @@ import org.opencv.android.Utils;
 import org.opencv.core.Mat;
 import org.opencv.imgproc.Imgproc;
 
-public class MyActivity extends Activity{
+public class MyActivity extends Activity implements View.OnTouchListener {
 
     private Button gallery, camera;
     private Drawable image;
@@ -61,6 +61,15 @@ public class MyActivity extends Activity{
     private static final int CAMERA_DATA = 2;
     private Uri outputFileUri;
     private String mCurrentPhotoPath;
+
+    // For zoom
+    private Matrix m;
+    private Matrix initm;
+    private Action act;
+    private PointF start;
+    private PointF middle;
+    private float xMid, yMid;
+    private float initDist;
 
     //Drawer Navigation Menu
     private DrawerLayout mDrawerLayout;
@@ -92,6 +101,12 @@ public class MyActivity extends Activity{
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_my);
+
+        m = new Matrix();
+        initm = new Matrix();
+        act = Action.NONE;
+        start = new PointF();
+        middle = new PointF();
 
         mTitle = mDrawerTitle = getTitle();
         info = (TextView) findViewById(R.id.textView3);
@@ -134,7 +149,7 @@ public class MyActivity extends Activity{
         menu.setSatelliteDistance((int) distance);
         menu.setExpandDuration(500);
         menu.setCloseItemsOnClick(true);
-        menu.setTotalSpacingDegree(120);
+        menu.setTotalSpacingDegree(90);
 
         List<SatelliteMenuItem> items = new ArrayList<SatelliteMenuItem>();
         items.add(new SatelliteMenuItem(1, android.R.drawable.ic_menu_gallery));
@@ -177,6 +192,8 @@ public class MyActivity extends Activity{
             title.setText("MobDIP");
             welcome.setText("Welcome to Digital Image Processing App");
         }
+
+        theImage.setOnTouchListener(this);
     }
 
     /**
@@ -279,7 +296,8 @@ public class MyActivity extends Activity{
                     Utils.matToBitmap(gray, chosenImage);
 
                     image = new BitmapDrawable(chosenImage);
-                    relativeLayout.setBackgroundDrawable(image);
+                    //relativeLayout.setBackgroundDrawable(image);
+                    theImage.setImageDrawable(image);
                     title.setText("");
                     welcome.setText("");
                     info.setText("");
@@ -308,7 +326,8 @@ public class MyActivity extends Activity{
                             chosenImage = BitmapFactory.decodeFile(imageLocation);
                             chosenImage.setDensity(Bitmap.DENSITY_NONE);
                             image = new BitmapDrawable(chosenImage);
-                            relativeLayout.setBackgroundDrawable(image);
+                            //relativeLayout.setBackgroundDrawable(image);
+                            theImage.setImageDrawable(image);
                         }
                     }
                     title.setText("");
@@ -331,7 +350,8 @@ public class MyActivity extends Activity{
 
         chosenImage = savedInstanceState.getParcelable("image");
         image = new BitmapDrawable(chosenImage);
-        relativeLayout.setBackgroundDrawable(image);
+        //relativeLayout.setBackgroundDrawable(image);
+        theImage.setImageDrawable(image);
 
     }
 
@@ -397,5 +417,58 @@ public class MyActivity extends Activity{
     {
         super.onResume();
         OpenCVLoader.initAsync(OpenCVLoader.OPENCV_VERSION_2_4_6, this, mLoaderCallback);
+    }
+
+    private float distBetweenFingers(MotionEvent event) {
+        float x = event.getX(0) - event.getX(1);
+        float y = event.getY(0) - event.getY(1);
+        float z = (float) Math.pow((Math.pow(x, 2) + Math.pow(y, 2)), 0.5);
+        return z;
+    }
+
+    private enum Action {
+        DRAG, ZOOM, NONE
+    }
+
+    public boolean onTouch(View v, MotionEvent e) {
+        switch (e.getAction() & MotionEvent.ACTION_MASK) {
+
+            // Drag
+            case MotionEvent.ACTION_DOWN:
+                initm.set(m);
+                start.set(e.getX(), e.getY());
+                act = Action.DRAG;
+                break;
+
+            // Zoom in/out
+            case MotionEvent.ACTION_POINTER_DOWN:
+                initDist = distBetweenFingers(e);
+                initm.set(m);
+                xMid = (e.getX(0) + e.getX(1)) / 2;
+                yMid = (e.getY(0) + e.getY(1)) / 2;
+                middle.set(xMid, yMid);
+                act = Action.ZOOM;
+                break;
+
+            case MotionEvent.ACTION_MOVE:
+                if (act == Action.DRAG) {
+                    m.set(initm);
+                    m.postTranslate(e.getX() - start.x, e.getY() - start.y);
+                } else if (act == Action.ZOOM) {
+                    float newDist = distBetweenFingers(e);
+                    m.set(initm);
+                    float scale = newDist / initDist;
+                    m.postScale(scale, scale, middle.x, middle.y);
+                }
+                break;
+
+            case MotionEvent.ACTION_POINTER_UP:
+                act = Action.NONE;
+                break;
+        }
+
+        theImage.setImageMatrix(m);
+
+        return true;
     }
 }
