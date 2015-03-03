@@ -29,6 +29,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 
+
 import java.io.File;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
@@ -37,6 +38,13 @@ import java.util.Date;
 import java.util.List;
 
 import android.view.ext.*;
+
+import org.opencv.android.BaseLoaderCallback;
+import org.opencv.android.LoaderCallbackInterface;
+import org.opencv.android.OpenCVLoader;
+import org.opencv.android.Utils;
+import org.opencv.core.Mat;
+import org.opencv.imgproc.Imgproc;
 
 public class MyActivity extends Activity{
 
@@ -246,7 +254,6 @@ public class MyActivity extends Activity{
         }
 
     // Get selected photo
-    @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         switch (requestCode) {
@@ -264,6 +271,13 @@ public class MyActivity extends Activity{
                     cursor.close();
 
                     chosenImage = BitmapFactory.decodeFile(filePath);
+
+                    // OpenCV stuff
+                    Mat gray = new Mat();
+                    Utils.bitmapToMat(chosenImage, gray);
+                    Imgproc.cvtColor(gray, gray, Imgproc.COLOR_RGB2GRAY);
+                    Utils.matToBitmap(gray, chosenImage);
+
                     image = new BitmapDrawable(chosenImage);
                     relativeLayout.setBackgroundDrawable(image);
                     title.setText("");
@@ -322,7 +336,7 @@ public class MyActivity extends Activity{
     }
 
     /**
-     * Displaying fragment view for selected nav drawer list item
+     * Diplaying fragment view for selected nav drawer list item
      * */
     private void displayView(int position) {
         // update the main content by replacing fragments
@@ -360,5 +374,28 @@ public class MyActivity extends Activity{
     public void setTitle(CharSequence title) {
         mTitle = title;
         getActionBar().setTitle(mTitle);
+    }
+
+    private BaseLoaderCallback mLoaderCallback = new BaseLoaderCallback(this) {
+        @Override
+        public void onManagerConnected(int status) {
+            switch (status) {
+                case LoaderCallbackInterface.SUCCESS:
+                {
+                    Log.i("load", "OpenCV loaded successfully");
+                } break;
+                default:
+                {
+                    super.onManagerConnected(status);
+                } break;
+            }
+        }
+    };
+
+    @Override
+    public void onResume()
+    {
+        super.onResume();
+        OpenCVLoader.initAsync(OpenCVLoader.OPENCV_VERSION_2_4_6, this, mLoaderCallback);
     }
 }
