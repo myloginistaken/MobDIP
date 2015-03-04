@@ -25,6 +25,7 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.Button;
+import android.widget.ExpandableListView;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.RelativeLayout;
@@ -73,7 +74,7 @@ public class MyActivity extends Activity implements View.OnTouchListener {
 
     //Drawer Navigation Menu
     private DrawerLayout mDrawerLayout;
-    private ListView mDrawerList;
+    private ExpandableListView mDrawerList;
 
     // nav drawer title
     private CharSequence mDrawerTitle;
@@ -85,7 +86,9 @@ public class MyActivity extends Activity implements View.OnTouchListener {
     private String[] navMenuTitles;
     private TypedArray navMenuIcons;
 
-    private ArrayList<NavDrawerItem> navDrawerItems;
+    private ArrayList<ArrayList<String>> groups;
+    private ArrayList<String> chapter1, chapter2, chapter3;
+
     private NavDrawerListAdapter adapter;
 
 
@@ -114,27 +117,26 @@ public class MyActivity extends Activity implements View.OnTouchListener {
         navMenuTitles = getResources().getStringArray(R.array.nav_drawer_items);
 
         mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
-        mDrawerList = (ListView) findViewById(R.id.list_slidermenu);
+        mDrawerList = (ExpandableListView) findViewById(R.id.list_slidermenu);
 
-        navDrawerItems = new ArrayList<NavDrawerItem>();
+        //Make data for NavDrawerListAdapter - groups and buttons in sliding menu
+        groups = new ArrayList<ArrayList<String>>();
+        chapter1 = new ArrayList<String>();
+        chapter2 = new ArrayList<String>();
+        chapter3 = new ArrayList<String>();
+        chapter1.add("Make");
+        chapter1.add("Something");
+        groups.add(chapter1);
+        chapter2.add("Make");
+        chapter2.add("Something");
+        chapter2.add("Cool");
+        groups.add(chapter2);
+        chapter3.add("Do");
+        chapter3.add("Nuffin");
+        groups.add(chapter3);
 
-        // adding nav drawer items to array
-        // Chapter 1
-        navDrawerItems.add(new NavDrawerItem(navMenuTitles[0]));
-        // Chapter 2
-        navDrawerItems.add(new NavDrawerItem(navMenuTitles[1]));
-        // Chapter 3
-        navDrawerItems.add(new NavDrawerItem(navMenuTitles[2]));
-        // Chapter 4
-        navDrawerItems.add(new NavDrawerItem(navMenuTitles[3]));
-        // Chapter 5
-        navDrawerItems.add(new NavDrawerItem(navMenuTitles[4]));
-        // Chapter 6
-        navDrawerItems.add(new NavDrawerItem(navMenuTitles[5]));
-
-        // setting the nav drawer list adapter
-        adapter = new NavDrawerListAdapter(getApplicationContext(),
-                navDrawerItems);
+        //Make adapter and give it the list of data
+        NavDrawerListAdapter adapter = new NavDrawerListAdapter(getApplicationContext(), groups);
         mDrawerList.setAdapter(adapter);
 
         if (savedInstanceState == null) {
@@ -200,7 +202,7 @@ public class MyActivity extends Activity implements View.OnTouchListener {
      * Slide menu item click listener
      * */
     private class SlideMenuClickListener implements
-            ListView.OnItemClickListener {
+            ExpandableListView.OnItemClickListener {
         @Override
         public void onItemClick(AdapterView<?> parent, View view, int position,
                                 long id) {
@@ -302,7 +304,6 @@ public class MyActivity extends Activity implements View.OnTouchListener {
                     welcome.setText("");
                     info.setText("");
                 }
-            //TODO: Photo from gallery or from MobDIP? Is it the suitable way? Why do we do it differently than in IMAGE_CHOSEN case?
             case CAMERA_DATA :
                 if (requestCode == CAMERA_DATA){
                     // Find the last picture
