@@ -57,7 +57,9 @@ public class MyActivity extends Activity implements View.OnTouchListener {
     private ImageView theImage;
     private boolean imageSet = false;
     private boolean grayscaled = false;
+    private boolean fromCamera = false;
     private String filePath;
+    private String imageLocation;
 
     private Bitmap chosenImage = null;
     private Bitmap chosenImageColor = null;
@@ -173,6 +175,7 @@ public class MyActivity extends Activity implements View.OnTouchListener {
                 switch (id){
                     case 1:
                         // Back to color image
+                        colorImage = new BitmapDrawable(chosenImageColor);
                         theImage.setImageDrawable(colorImage);
                         grayscaled=false;
                         break;
@@ -322,6 +325,7 @@ public class MyActivity extends Activity implements View.OnTouchListener {
                     image = new BitmapDrawable(chosenImage);
                     //relativeLayout.setBackgroundDrawable(image);
                     theImage.setImageDrawable(image);
+                    fromCamera = false;
                     title.setText("");
                     welcome.setText("");
                     info.setText("");
@@ -343,7 +347,7 @@ public class MyActivity extends Activity implements View.OnTouchListener {
                     // Put it in the image view
                     if (cursor.moveToFirst()) {
                         final RelativeLayout relativeLayout = (RelativeLayout) findViewById(R.id.relativeLayout);
-                        String imageLocation = cursor.getString(1);
+                        imageLocation = cursor.getString(1);
                         File imageFile = new File(imageLocation);
                         if (imageFile.exists()) {
                             chosenImage = BitmapFactory.decodeFile(imageLocation);
@@ -353,6 +357,7 @@ public class MyActivity extends Activity implements View.OnTouchListener {
 
                             image = new BitmapDrawable(chosenImage);
                             theImage.setImageDrawable(image);
+                            fromCamera = true;
                         }
                     }
                     title.setText("");
@@ -369,7 +374,9 @@ public class MyActivity extends Activity implements View.OnTouchListener {
         if ((BitmapDrawable)theImage.getDrawable()!=null) {
             outState.putParcelable("image", ((BitmapDrawable) theImage.getDrawable()).getBitmap());
             outState.putBoolean("ifGrayscaled", grayscaled);
-            outState.putString("pathToFile", filePath);
+            outState.putBoolean("ifFromCamera", fromCamera);
+            outState.putString("pathToFileGallery", filePath);
+            outState.putString("pathToFileCamera", imageLocation);
         }
     }
 
@@ -378,8 +385,15 @@ public class MyActivity extends Activity implements View.OnTouchListener {
         super.onRestoreInstanceState(savedInstanceState);
         chosenImage = savedInstanceState.getParcelable("image");
         grayscaled = savedInstanceState.getBoolean("ifGrayscaled");
-        filePath = savedInstanceState.getString("pathToFile");
-        chosenImageColor = BitmapFactory.decodeFile(filePath);
+        fromCamera = savedInstanceState.getBoolean("ifFromCamera");
+        filePath = savedInstanceState.getString("pathToFileGallery");
+        imageLocation = savedInstanceState.getString("pathToFileCamera");
+        
+        if (fromCamera){
+            chosenImageColor = BitmapFactory.decodeFile(imageLocation);
+        }else {
+            chosenImageColor = BitmapFactory.decodeFile(filePath);
+        }
 
         if (grayscaled) {
             image = new BitmapDrawable(chosenImage);
