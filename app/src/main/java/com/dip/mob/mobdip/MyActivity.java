@@ -165,7 +165,6 @@ public class MyActivity extends Activity implements View.OnTouchListener {
         items.add(new SatelliteMenuItem(3, android.R.drawable.ic_menu_gallery));
         items.add(new SatelliteMenuItem(2, R.drawable.gray));
         items.add(new SatelliteMenuItem(1, R.drawable.color));
-
         menu.addItems(items);
 
         menu.setOnItemClickedListener(new SatelliteMenu.SateliteClickedListener() {
@@ -174,7 +173,6 @@ public class MyActivity extends Activity implements View.OnTouchListener {
                 switch (id){
                     case 1:
                         // Back to color image
-                        colorImage = new BitmapDrawable(chosenImageColor);
                         theImage.setImageDrawable(colorImage);
                         grayscaled=false;
                         break;
@@ -349,9 +347,11 @@ public class MyActivity extends Activity implements View.OnTouchListener {
                         File imageFile = new File(imageLocation);
                         if (imageFile.exists()) {
                             chosenImage = BitmapFactory.decodeFile(imageLocation);
-                            chosenImage.setDensity(Bitmap.DENSITY_NONE);
+
+                            chosenImageColor = BitmapFactory.decodeFile(imageLocation);
+                            colorImage = new BitmapDrawable(chosenImageColor);
+
                             image = new BitmapDrawable(chosenImage);
-                            //relativeLayout.setBackgroundDrawable(image);
                             theImage.setImageDrawable(image);
                         }
                     }
