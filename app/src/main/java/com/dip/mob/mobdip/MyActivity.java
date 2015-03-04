@@ -39,23 +39,28 @@ import java.util.Date;
 import java.util.List;
 
 import android.view.ext.*;
+import android.widget.Toast;
 
 import org.opencv.android.BaseLoaderCallback;
 import org.opencv.android.LoaderCallbackInterface;
 import org.opencv.android.OpenCVLoader;
 import org.opencv.android.Utils;
+import org.opencv.core.CvType;
 import org.opencv.core.Mat;
 import org.opencv.imgproc.Imgproc;
 
 public class MyActivity extends Activity implements View.OnTouchListener {
 
     private Button gallery, camera;
-    private Drawable image;
+    private Drawable colorImage, image;
     private ScaleDrawable sc;
     private ImageView theImage;
     private boolean imageSet = false;
+    private boolean grayscaled = false;
+    private String filePath;
 
     private Bitmap chosenImage = null;
+    private Bitmap chosenImageColor = null;
     private static final int IMAGE_CHOSEN = 1;
     private TextView title, welcome, info;
 
@@ -154,9 +159,13 @@ public class MyActivity extends Activity implements View.OnTouchListener {
         menu.setTotalSpacingDegree(90);
 
         List<SatelliteMenuItem> items = new ArrayList<SatelliteMenuItem>();
-        items.add(new SatelliteMenuItem(1, android.R.drawable.ic_menu_gallery));
-        items.add(new SatelliteMenuItem(2, android.R.drawable.ic_menu_camera));
-        items.add(new SatelliteMenuItem(3, android.R.drawable.ic_menu_info_details));
+        items.add(new SatelliteMenuItem(5, android.R.drawable.ic_menu_info_details));
+        items.add(new SatelliteMenuItem(6, android.R.drawable.ic_menu_save));
+        items.add(new SatelliteMenuItem(4, android.R.drawable.ic_menu_camera));
+        items.add(new SatelliteMenuItem(3, android.R.drawable.ic_menu_gallery));
+        items.add(new SatelliteMenuItem(2, R.drawable.gray));
+        items.add(new SatelliteMenuItem(1, R.drawable.color));
+
         menu.addItems(items);
 
         menu.setOnItemClickedListener(new SatelliteMenu.SateliteClickedListener() {
@@ -164,12 +173,23 @@ public class MyActivity extends Activity implements View.OnTouchListener {
             public void eventOccured(int id) {
                 switch (id){
                     case 1:
-                        upload();
+                        // Back to color image
+                        colorImage = new BitmapDrawable(chosenImageColor);
+                        theImage.setImageDrawable(colorImage);
+                        grayscaled=false;
                         break;
                     case 2:
-                        dispatchTakePictureIntent();
+                        // Grayscale image
+                        grayscale(theImage);
+                        grayscaled=true;
                         break;
                     case 3:
+                        upload();
+                        break;
+                    case 4:
+                        dispatchTakePictureIntent();
+                        break;
+                    case 5:
                         info.setText("This app has been developed by a magic trio in order to illustrate different image processing techniques learnt in the course Digital Image Processing");
                 }
                 //Toast.makeText(MyActivity.this, "Clicked on " + id, Toast.LENGTH_LONG).show();
@@ -212,8 +232,15 @@ public class MyActivity extends Activity implements View.OnTouchListener {
     }
 
         // take photo and upload it to app
-        public void takePhotoAndUpload(MenuItem m) {
-            dispatchTakePictureIntent();
+        public void grayscale(ImageView iv) {
+            if (chosenImage!=null) {
+                Mat gray = new Mat();
+                Utils.bitmapToMat(chosenImage, gray);
+                Imgproc.cvtColor(gray, gray, Imgproc.COLOR_RGB2GRAY);
+                Utils.matToBitmap(gray, chosenImage);
+                image = new BitmapDrawable(chosenImage);
+                iv.setImageDrawable(image);
+            }
         }
 
         // upload picture from gallery
@@ -286,16 +313,13 @@ public class MyActivity extends Activity implements View.OnTouchListener {
                     cursor.moveToFirst();
 
                     int colInd = cursor.getColumnIndex(projection[0]);
-                    String filePath = cursor.getString(colInd);
+                    filePath = cursor.getString(colInd);
                     cursor.close();
 
                     chosenImage = BitmapFactory.decodeFile(filePath);
 
-                    // OpenCV stuff
-                    Mat gray = new Mat();
-                    Utils.bitmapToMat(chosenImage, gray);
-                    Imgproc.cvtColor(gray, gray, Imgproc.COLOR_RGB2GRAY);
-                    Utils.matToBitmap(gray, chosenImage);
+                    chosenImageColor = BitmapFactory.decodeFile(filePath);
+                    colorImage = new BitmapDrawable(chosenImageColor);
 
                     image = new BitmapDrawable(chosenImage);
                     //relativeLayout.setBackgroundDrawable(image);
@@ -342,16 +366,27 @@ public class MyActivity extends Activity implements View.OnTouchListener {
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        outState.putParcelable("image", chosenImage);
+        if ((BitmapDrawable)theImage.getDrawable()!=null) {
+            outState.putParcelable("image", ((BitmapDrawable) theImage.getDrawable()).getBitmap());
+            outState.putBoolean("ifGrayscaled", grayscaled);
+            outState.putString("pathToFile", filePath);
+        }
     }
 
     @Override
     public void onRestoreInstanceState(Bundle savedInstanceState) {
         super.onRestoreInstanceState(savedInstanceState);
-
         chosenImage = savedInstanceState.getParcelable("image");
-        image = new BitmapDrawable(chosenImage);
-        //relativeLayout.setBackgroundDrawable(image);
+        grayscaled = savedInstanceState.getBoolean("ifGrayscaled");
+        filePath = savedInstanceState.getString("pathToFile");
+        chosenImageColor = BitmapFactory.decodeFile(filePath);
+
+        if (grayscaled) {
+            image = new BitmapDrawable(chosenImage);
+        } else {
+            image = new BitmapDrawable(chosenImageColor);
+        }
+
         theImage.setImageDrawable(image);
 
     }
