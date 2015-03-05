@@ -131,12 +131,17 @@ public class MyActivity extends Activity implements View.OnTouchListener {
         chapter1 = new ArrayList<String>();
         chapter2 = new ArrayList<String>();
         chapter3 = new ArrayList<String>();
-        chapter1.add("Make");
-        chapter1.add("Something");
+        chapter1.add("Nearest Neighbor");
+        chapter1.add("Bicubic");
+        chapter1.add("Bilinear");
+        chapter1.add("Lanczos");
+        chapter1.add("Quantization");
         groups.add(chapter1);
-        chapter2.add("Make");
-        chapter2.add("Something");
-        chapter2.add("Cool");
+        chapter2.add("Power/Root");
+        chapter2.add("Exponential");
+        chapter2.add("Logarithmic");
+        chapter2.add("Histogram Equalization");
+        chapter2.add("Singular Value Equalization");
         groups.add(chapter2);
         chapter3.add("Do");
         chapter3.add("Nuffin");
@@ -161,8 +166,9 @@ public class MyActivity extends Activity implements View.OnTouchListener {
         menu.setTotalSpacingDegree(90);
 
         List<SatelliteMenuItem> items = new ArrayList<SatelliteMenuItem>();
-        items.add(new SatelliteMenuItem(5, android.R.drawable.ic_menu_info_details));
-        items.add(new SatelliteMenuItem(6, android.R.drawable.ic_menu_save));
+        items.add(new SatelliteMenuItem(7, android.R.drawable.ic_menu_info_details));
+        items.add(new SatelliteMenuItem(6, R.drawable.histogram));
+        items.add(new SatelliteMenuItem(5, android.R.drawable.ic_menu_save));
         items.add(new SatelliteMenuItem(4, android.R.drawable.ic_menu_camera));
         items.add(new SatelliteMenuItem(3, android.R.drawable.ic_menu_gallery));
         items.add(new SatelliteMenuItem(2, R.drawable.gray));
@@ -190,7 +196,7 @@ public class MyActivity extends Activity implements View.OnTouchListener {
                     case 4:
                         dispatchTakePictureIntent();
                         break;
-                    case 5:
+                    case 7:
                         info.setText("This app has been developed by a magic trio in order to illustrate different image processing techniques learnt in the course Digital Image Processing");
                 }
                 //Toast.makeText(MyActivity.this, "Clicked on " + id, Toast.LENGTH_LONG).show();
@@ -388,7 +394,7 @@ public class MyActivity extends Activity implements View.OnTouchListener {
         fromCamera = savedInstanceState.getBoolean("ifFromCamera");
         filePath = savedInstanceState.getString("pathToFileGallery");
         imageLocation = savedInstanceState.getString("pathToFileCamera");
-        
+
         if (fromCamera){
             chosenImageColor = BitmapFactory.decodeFile(imageLocation);
         }else {
