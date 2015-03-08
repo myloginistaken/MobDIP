@@ -36,6 +36,7 @@ import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 
 import android.view.ext.*;
@@ -93,7 +94,7 @@ public class MyActivity extends Activity implements View.OnTouchListener {
     private String[] navMenuTitles;
     private TypedArray navMenuIcons;
 
-    private ArrayList<ArrayList<String>> groups;
+    private HashMap<String, ArrayList<String>> groups;
     private ArrayList<String> chapter1, chapter2, chapter3;
 
     private NavDrawerListAdapter adapter;
@@ -127,8 +128,8 @@ public class MyActivity extends Activity implements View.OnTouchListener {
         mDrawerList = (ExpandableListView) findViewById(R.id.list_slidermenu);
 
         //Make data for NavDrawerListAdapter - groups and buttons in sliding menu
-        groups = new ArrayList<ArrayList<String>>();
-        chapter1 = new ArrayList<String>();
+        groups = new HashMap<String, ArrayList<String>>();
+        chapter1 = new ArrayList<String>();//"Zooming and Quantization", 0);
         chapter2 = new ArrayList<String>();
         chapter3 = new ArrayList<String>();
         chapter1.add("Nearest Neighbor");
@@ -136,16 +137,16 @@ public class MyActivity extends Activity implements View.OnTouchListener {
         chapter1.add("Bilinear");
         chapter1.add("Lanczos");
         chapter1.add("Quantization");
-        groups.add(chapter1);
+        groups.put("Zooming and Quantization", chapter1);
         chapter2.add("Power/Root");
         chapter2.add("Exponential");
         chapter2.add("Logarithmic");
         chapter2.add("Histogram Equalization");
         chapter2.add("Singular Value Equalization");
-        groups.add(chapter2);
+        groups.put("Illumination Enhancement", chapter2);
         chapter3.add("Do");
         chapter3.add("Nuffin");
-        groups.add(chapter3);
+        groups.put("The Third One", chapter3);
 
         //Make adapter and give it the list of data
         NavDrawerListAdapter adapter = new NavDrawerListAdapter(getApplicationContext(), groups);

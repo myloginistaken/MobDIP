@@ -5,6 +5,7 @@ package com.dip.mob.mobdip;
  */
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 import android.app.Activity;
 import android.content.Context;
@@ -19,10 +20,10 @@ import android.widget.Toast;
 
 public class NavDrawerListAdapter extends BaseExpandableListAdapter {
 
-    private ArrayList<ArrayList<String>> mGroups;
+    private HashMap<String,ArrayList<String>> mGroups;
     private Context mContext;
 
-    public NavDrawerListAdapter (Context context,ArrayList<ArrayList<String>> groups){
+    public NavDrawerListAdapter (Context context,HashMap<String,ArrayList<String>> groups){
         mContext = context;
         mGroups = groups;
     }
@@ -34,7 +35,7 @@ public class NavDrawerListAdapter extends BaseExpandableListAdapter {
 
     @Override
     public int getChildrenCount(int groupPosition) {
-        return mGroups.get(groupPosition).size();
+        return mGroups.get(getGroupName(groupPosition)).size();
     }
 
     @Override
@@ -62,6 +63,11 @@ public class NavDrawerListAdapter extends BaseExpandableListAdapter {
         return true;
     }
 
+    public String getGroupName(int groupPosition){
+        String name = mGroups.keySet().toArray()[groupPosition].toString();
+        return name;
+    }
+
     @Override
     public View getGroupView(int groupPosition, boolean isExpanded, View convertView,
                              ViewGroup parent) {
@@ -72,14 +78,14 @@ public class NavDrawerListAdapter extends BaseExpandableListAdapter {
         }
 
         if (isExpanded){
-            //Изменяем что-нибудь, если текущая Group раскрыта
+            //Change something, if current group is open
         }
         else{
-            //Изменяем что-нибудь, если текущая Group скрыта
+            //Change something, if current group is hidden
         }
 
         TextView textGroup = (TextView) convertView.findViewById(R.id.textGroup);
-        textGroup.setText("Chapter " + Integer.toString(groupPosition+1));
+        textGroup.setText(getGroupName(groupPosition));
 
         return convertView;
 
@@ -94,7 +100,7 @@ public class NavDrawerListAdapter extends BaseExpandableListAdapter {
         }
 
         TextView textChild = (TextView) convertView.findViewById(R.id.textChild);
-        textChild.setText(mGroups.get(groupPosition).get(childPosition));
+        textChild.setText(mGroups.get(getGroupName(groupPosition)).get(childPosition));
 
         return convertView;
     }
