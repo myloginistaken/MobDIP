@@ -20,12 +20,14 @@ import android.widget.Toast;
 
 public class NavDrawerListAdapter extends BaseExpandableListAdapter {
 
-    private HashMap<String,ArrayList<String>> mGroups;
+    private ArrayList<ArrayList<String>> mGroups;
+    private ArrayList<String> groupNames;
     private Context mContext;
 
-    public NavDrawerListAdapter (Context context,HashMap<String,ArrayList<String>> groups){
+    public NavDrawerListAdapter (Context context,ArrayList<ArrayList<String>> groups, ArrayList<String> names){
         mContext = context;
         mGroups = groups;
+        groupNames = names;
     }
 
     @Override
@@ -35,7 +37,7 @@ public class NavDrawerListAdapter extends BaseExpandableListAdapter {
 
     @Override
     public int getChildrenCount(int groupPosition) {
-        return mGroups.get(getGroupName(groupPosition)).size();
+        return mGroups.get(groupPosition).size();
     }
 
     @Override
@@ -63,11 +65,6 @@ public class NavDrawerListAdapter extends BaseExpandableListAdapter {
         return true;
     }
 
-    public String getGroupName(int groupPosition){
-        String name = mGroups.keySet().toArray()[groupPosition].toString();
-        return name;
-    }
-
     @Override
     public View getGroupView(int groupPosition, boolean isExpanded, View convertView,
                              ViewGroup parent) {
@@ -85,7 +82,7 @@ public class NavDrawerListAdapter extends BaseExpandableListAdapter {
         }
 
         TextView textGroup = (TextView) convertView.findViewById(R.id.textGroup);
-        textGroup.setText(getGroupName(groupPosition));
+        textGroup.setText(groupNames.get(groupPosition));
 
         return convertView;
 
@@ -100,7 +97,7 @@ public class NavDrawerListAdapter extends BaseExpandableListAdapter {
         }
 
         TextView textChild = (TextView) convertView.findViewById(R.id.textChild);
-        textChild.setText(mGroups.get(getGroupName(groupPosition)).get(childPosition));
+        textChild.setText(mGroups.get(groupPosition).get(childPosition));
 
         return convertView;
     }

@@ -94,8 +94,8 @@ public class MyActivity extends Activity implements View.OnTouchListener {
     private String[] navMenuTitles;
     private TypedArray navMenuIcons;
 
-    private HashMap<String, ArrayList<String>> groups;
-    private ArrayList<String> chapter1, chapter2, chapter3;
+    private ArrayList<ArrayList<String>> groups;
+    private ArrayList<String> groupNames, chapter1, chapter2, chapter3, chapter4;
 
     private NavDrawerListAdapter adapter;
 
@@ -128,28 +128,37 @@ public class MyActivity extends Activity implements View.OnTouchListener {
         mDrawerList = (ExpandableListView) findViewById(R.id.list_slidermenu);
 
         //Make data for NavDrawerListAdapter - groups and buttons in sliding menu
-        groups = new HashMap<String, ArrayList<String>>();
-        chapter1 = new ArrayList<String>();//"Zooming and Quantization", 0);
+        groups = new ArrayList<ArrayList<String>>();
+        groupNames = new ArrayList<String>();
+        groupNames.add("Zooming and Quantization");
+        groupNames.add("Illumination Enhancement");
+        groupNames.add("The Third One");
+        groupNames.add("Don't touch it");
+        chapter1 = new ArrayList<String>();
         chapter2 = new ArrayList<String>();
         chapter3 = new ArrayList<String>();
+        chapter4 = new ArrayList<String>();
         chapter1.add("Nearest Neighbor");
         chapter1.add("Bicubic");
         chapter1.add("Bilinear");
         chapter1.add("Lanczos");
         chapter1.add("Quantization");
-        groups.put("Zooming and Quantization", chapter1);
+        groups.add(chapter1);
         chapter2.add("Power/Root");
         chapter2.add("Exponential");
         chapter2.add("Logarithmic");
         chapter2.add("Histogram Equalization");
         chapter2.add("Singular Value Equalization");
-        groups.put("Illumination Enhancement", chapter2);
+        groups.add(chapter2);
         chapter3.add("Do");
         chapter3.add("Nuffin");
-        groups.put("The Third One", chapter3);
+        groups.add(chapter3);
+        chapter4.add("Just");
+        chapter4.add("Testing");
+        groups.add(chapter4);
 
         //Make adapter and give it the list of data
-        NavDrawerListAdapter adapter = new NavDrawerListAdapter(getApplicationContext(), groups);
+        NavDrawerListAdapter adapter = new NavDrawerListAdapter(getApplicationContext(), groups, groupNames);
         mDrawerList.setAdapter(adapter);
 
         if (savedInstanceState == null) {
@@ -413,7 +422,7 @@ public class MyActivity extends Activity implements View.OnTouchListener {
     }
 
     /**
-     * Diplaying fragment view for selected nav drawer list item
+     * Displaying fragment view for selected nav drawer list item
      * */
     private void displayView(int position) {
         // update the main content by replacing fragments
