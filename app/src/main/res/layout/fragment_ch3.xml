@@ -7,10 +7,9 @@
         android:id="@+id/txtLabel"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_centerHorizontal="true"
-        android:layout_centerVertical="true"
-        android:text="Zooming and Quantization"
-        android:textAppearance="?android:attr/textAppearanceMedium" />
+        android:layout_centerInParent="true"
+        android:textSize="16dp"
+        android:text="The Third One"/>
 
     <ImageView android:layout_width="wrap_content"
         android:layout_height="wrap_content"

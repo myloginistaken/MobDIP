@@ -11,13 +11,32 @@
     <string name="drawer_close">Slider Menu Closed</string>
 
     <!-- Nav Drawer Menu Items -->
-    <string-array name="nav_drawer_items">
-        <item >Zooming and Quantization</item>
-        <item >Illumination Enhancement</item>
-        <item >Chapter 3</item>
-        <item >Chapter 4</item>
-        <item >Chapter 5</item>
-        <item >Chapter 6</item>
+    <string-array name="nav_drawer_groups">
+        <item>Zooming and Quantization</item>
+        <item>Illumination Enhancement</item>
+        <item>The Third One</item>
+    </string-array>
+
+    <string-array name="nav_drawer_kids1">
+        <item>Nearest Neighbour</item>
+        <item>Bicubic</item>
+        <item>Bilinear</item>
+        <item>Lanczos</item>
+        <item>Quantization</item>
+    </string-array>
+
+    <string-array name="nav_drawer_kids2">
+        <item>Power/Root</item>
+        <item>Exponential</item>
+        <item>Logarithmic</item>
+        <item>Histogram Equalization</item>
+        <item>Singular Value Equalization</item>
+    </string-array>
+
+    <string-array name="nav_drawer_kids3">
+        <item>Do</item>
+        <item>Hast</item>
+        <item>Mich</item>
     </string-array>
 
 </resources>

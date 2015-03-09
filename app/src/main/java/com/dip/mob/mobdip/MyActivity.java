@@ -3,6 +3,7 @@ package com.dip.mob.mobdip;
 import android.app.Activity;
 import android.app.Fragment;
 import android.app.FragmentManager;
+import android.content.Context;
 import android.content.Intent;
 import android.content.res.TypedArray;
 import android.database.Cursor;
@@ -122,49 +123,43 @@ public class MyActivity extends Activity implements View.OnTouchListener {
         mTitle = mDrawerTitle = getTitle();
         info = (TextView) findViewById(R.id.textView3);
         // load slide menu items
-        navMenuTitles = getResources().getStringArray(R.array.nav_drawer_items);
+        navMenuTitles = getResources().getStringArray(R.array.nav_drawer_groups);
 
         mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
         mDrawerList = (ExpandableListView) findViewById(R.id.list_slidermenu);
 
         //Make data for NavDrawerListAdapter - groups and buttons in sliding menu
+        //TODO:Fill arrays with loops
         groups = new ArrayList<ArrayList<String>>();
         groupNames = new ArrayList<String>();
-        groupNames.add("Zooming and Quantization");
-        groupNames.add("Illumination Enhancement");
-        groupNames.add("The Third One");
-        groupNames.add("Don't touch it");
+        groupNames.add(getResources().getStringArray(R.array.nav_drawer_groups)[0]);
+        groupNames.add(getResources().getStringArray(R.array.nav_drawer_groups)[1]);
+        groupNames.add(getResources().getStringArray(R.array.nav_drawer_groups)[2]);
         chapter1 = new ArrayList<String>();
         chapter2 = new ArrayList<String>();
         chapter3 = new ArrayList<String>();
         chapter4 = new ArrayList<String>();
-        chapter1.add("Nearest Neighbor");
-        chapter1.add("Bicubic");
-        chapter1.add("Bilinear");
-        chapter1.add("Lanczos");
-        chapter1.add("Quantization");
+        chapter1.add(getResources().getStringArray(R.array.nav_drawer_kids1)[0]);
+        chapter1.add(getResources().getStringArray(R.array.nav_drawer_kids1)[1]);
+        chapter1.add(getResources().getStringArray(R.array.nav_drawer_kids1)[2]);
+        chapter1.add(getResources().getStringArray(R.array.nav_drawer_kids1)[3]);
+        chapter1.add(getResources().getStringArray(R.array.nav_drawer_kids1)[4]);
         groups.add(chapter1);
-        chapter2.add("Power/Root");
-        chapter2.add("Exponential");
-        chapter2.add("Logarithmic");
-        chapter2.add("Histogram Equalization");
-        chapter2.add("Singular Value Equalization");
+        chapter2.add(getResources().getStringArray(R.array.nav_drawer_kids2)[0]);
+        chapter2.add(getResources().getStringArray(R.array.nav_drawer_kids2)[1]);
+        chapter2.add(getResources().getStringArray(R.array.nav_drawer_kids2)[2]);
+        chapter2.add(getResources().getStringArray(R.array.nav_drawer_kids2)[3]);
+        chapter2.add(getResources().getStringArray(R.array.nav_drawer_kids2)[4]);
         groups.add(chapter2);
-        chapter3.add("Do");
-        chapter3.add("Nuffin");
+        chapter3.add(getResources().getStringArray(R.array.nav_drawer_kids3)[0]);
+        chapter3.add(getResources().getStringArray(R.array.nav_drawer_kids3)[1]);
+        chapter3.add(getResources().getStringArray(R.array.nav_drawer_kids3)[2]);
         groups.add(chapter3);
-        chapter4.add("Just");
-        chapter4.add("Testing");
-        groups.add(chapter4);
 
         //Make adapter and give it the list of data
         NavDrawerListAdapter adapter = new NavDrawerListAdapter(getApplicationContext(), groups, groupNames);
         mDrawerList.setAdapter(adapter);
-
-        if (savedInstanceState == null) {
-            // on first time display view for first nav item
-            displayView(0);
-        }
+        mDrawerList.setOnChildClickListener(new SlideMenuClickListener());
 
         SatelliteMenu menu = (SatelliteMenu) findViewById(R.id.menu);
 
@@ -233,19 +228,6 @@ public class MyActivity extends Activity implements View.OnTouchListener {
         }
 
         theImage.setOnTouchListener(this);
-    }
-
-    /**
-     * Slide menu item click listener
-     * */
-    private class SlideMenuClickListener implements
-            ExpandableListView.OnItemClickListener {
-        @Override
-        public void onItemClick(AdapterView<?> parent, View view, int position,
-                                long id) {
-            // display view for selected nav drawer item
-            displayView(position);
-        }
     }
 
         // take photo and upload it to app
@@ -422,34 +404,52 @@ public class MyActivity extends Activity implements View.OnTouchListener {
     }
 
     /**
+     * Slide menu item click listener
+     * */
+    private class SlideMenuClickListener implements
+            ExpandableListView.OnChildClickListener {
+        @Override
+        public boolean onChildClick(ExpandableListView parent, View view, int groupPosition, int childPosition,
+                                long id) {
+            // display view for selected nav drawer item
+            displayView(groupPosition, childPosition);
+            return true;
+        }
+    }
+
+    /**
      * Displaying fragment view for selected nav drawer list item
      * */
-    private void displayView(int position) {
+    private void displayView(int groupPosition, int childPosition) {
         // update the main content by replacing fragments
         Fragment fragment = null;
-        switch (position) {
+        switch (groupPosition) {
             case 0:
-                break;
-            case 1:
                 fragment = new Ch1();
                 break;
-            case 2:
+            case 1:
                 fragment = new Ch2();
+                break;
+            case 2:
+                fragment = new Ch3();
                 break;
             default:
                 break;
         }
 
         if (fragment != null) {
+            Bundle bund = new Bundle();
+            bund.putInt("childPosition", childPosition);
+            fragment.setArguments(bund);
             FragmentManager fragmentManager = getFragmentManager();
             fragmentManager.beginTransaction()
                     .replace(R.id.frame_container, fragment).commit();
 
             // update selected item and title, then close the drawer
-            mDrawerList.setItemChecked(position, true);
-            mDrawerList.setSelection(position);
-            setTitle(navMenuTitles[position]);
-            //mDrawerLayout.closeDrawer(mDrawerList);
+            mDrawerList.setItemChecked(groupPosition, true);
+            mDrawerList.setSelection(groupPosition);
+            //setTitle(navMenuTitles[groupPosition]);
+            mDrawerLayout.closeDrawer(mDrawerList);
         } else {
             // error in creating fragment
             Log.e("MainActivity", "Error in creating fragment");
