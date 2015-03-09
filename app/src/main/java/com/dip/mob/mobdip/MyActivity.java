@@ -30,6 +30,7 @@ import android.widget.ExpandableListView;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.RelativeLayout;
+import android.widget.SeekBar;
 import android.widget.TextView;
 
 import java.io.File;
@@ -94,6 +95,7 @@ public class MyActivity extends Activity implements View.OnTouchListener {
     // slide menu items
     private String[] navMenuTitles;
     private TypedArray navMenuIcons;
+    private SeekBar seekBar;
 
     private ArrayList<ArrayList<String>> groups;
     private ArrayList<String> groupNames, chapter1, chapter2, chapter3, chapter4;
@@ -122,6 +124,7 @@ public class MyActivity extends Activity implements View.OnTouchListener {
 
         mTitle = mDrawerTitle = getTitle();
         info = (TextView) findViewById(R.id.textView3);
+
         // load slide menu items
         navMenuTitles = getResources().getStringArray(R.array.nav_drawer_groups);
 
