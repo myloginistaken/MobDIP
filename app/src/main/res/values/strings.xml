@@ -22,7 +22,7 @@
         <item>Bicubic</item>
         <item>Bilinear</item>
         <item>Lanczos</item>
-        <item>Quantization</item>
+        <item>Bit-Plane Slicing</item>
     </string-array>
 
     <string-array name="nav_drawer_kids2">

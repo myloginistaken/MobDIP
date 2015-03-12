@@ -224,7 +224,7 @@ public class MyActivity extends Activity implements View.OnTouchListener {
 
         }
 
-        if(relativeLayout.getBackground() == null){ //theImage.getDrawable()
+        if(theImage.getDrawable() == null){
 
             title.setText("MobDIP");
             welcome.setText("Welcome to Digital Image Processing App");
@@ -405,6 +405,7 @@ public class MyActivity extends Activity implements View.OnTouchListener {
         theImage.setImageDrawable(image);
 
     }
+
 
     /**
      * Slide menu item click listener

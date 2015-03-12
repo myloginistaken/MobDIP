@@ -1,17 +1,28 @@
 package com.dip.mob.mobdip;
 
 import android.app.Fragment;
+import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.ColorDrawable;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.v4.widget.DrawerLayout;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import org.opencv.android.Utils;
+import org.opencv.core.CvType;
+import org.opencv.core.Mat;
+import org.opencv.imgproc.Imgproc;
+
+import java.util.Iterator;
+
 
 //Class to handle Chapter 1 image transformations
 public class Ch1 extends Fragment {
@@ -23,6 +34,10 @@ public class Ch1 extends Fragment {
     private SeekBar seekBar;
     private DrawerLayout layout;
     private Action currentAction;
+
+    private ImageView theImage;
+    private Bitmap bitmap, resultBmp;
+    private Drawable drawable;
 
     private enum Action {
         NN, BIC, BIL, LANC, BIT
@@ -43,6 +58,13 @@ public class Ch1 extends Fragment {
         title = (TextView) getActivity().findViewById(R.id.textView2);
         title.setText("");
 
+        seekBarView = getActivity().getLayoutInflater().inflate(R.layout.seekbar, null);
+        layout.addView(seekBarView);
+        seekBar = (SeekBar) getActivity().findViewById(R.id.seekBar);
+
+        theImage = (ImageView) getActivity().findViewById(R.id.image);
+        bitmap = ((BitmapDrawable) theImage.getDrawable()).getBitmap();
+
         switch (menuID){
             case 0:
                 currentAction=Action.NN;
@@ -58,18 +80,16 @@ public class Ch1 extends Fragment {
                 break;
             case 4:
                 currentAction=Action.BIT;
+                seekBar.setMax(8);
+                seekBar.setProgress(8);
                 break;
         }
 
-        seekBarView = getActivity().getLayoutInflater().inflate(R.layout.seekbar, null);
-        layout.addView(seekBarView);
-        seekBar = (SeekBar) getActivity().findViewById(R.id.seekBar);
+
 
         seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
-            int progressChanged = 0;
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean b) {
-                progressChanged=progress;
                 //Toast.makeText(getActivity(), "Progress: " + progress, Toast.LENGTH_SHORT).show();
                 switch (currentAction){
                     case NN:
@@ -85,7 +105,41 @@ public class Ch1 extends Fragment {
                         // Interpolate by the factor of progress
                         break;
                     case BIT:
-                        seekBar.setMax(8);
+                        Mat oneBit = new Mat();
+                        Utils.bitmapToMat(bitmap, oneBit);
+                        resultBmp = bitmap.copy(Bitmap.Config.ARGB_8888, true);
+                        Imgproc.cvtColor(oneBit, oneBit, Imgproc.COLOR_RGB2GRAY);
+                        oneBit.convertTo(oneBit, CvType.CV_32S);
+                        int size = (int) (oneBit.total()*oneBit.channels());
+
+                        int[] temp = new int[size];
+
+                        oneBit.get(0,0,temp);
+                        // 1-8 bit representations
+                        if (progress<2){
+                            int[] result = bitPlaneSlice(temp, size, 1);
+                            oneBit.put(0,0,result);
+                        }else if (progress>=2 && progress<3){
+                            int[] result = bitPlaneSlice(temp, size, 2);
+                            oneBit.put(0,0,result);
+                        }else if (progress<4){
+                            int[] result = bitPlaneSlice(temp, size, 3);
+                            oneBit.put(0,0,result);
+                        }else if (progress<5){
+                            int[] result = bitPlaneSlice(temp, size, 4);
+                            oneBit.put(0,0,result);
+                        }else if (progress<6){
+                            int[] result = bitPlaneSlice(temp, size, 5);
+                            oneBit.put(0,0,result);
+                        }else if (progress<7){
+                            int[] result = bitPlaneSlice(temp, size, 6);
+                            oneBit.put(0,0,result);
+                        }
+
+                        oneBit.convertTo(oneBit, CvType.CV_8UC1);
+                        Utils.matToBitmap(oneBit, resultBmp);
+                        drawable = new BitmapDrawable(resultBmp);
+                        theImage.setImageDrawable(drawable);
                         break;
                 }
 
@@ -105,6 +159,19 @@ public class Ch1 extends Fragment {
 
 
         return rootView;
+    }
+
+    private int[] bitPlaneSlice(int[] input, int size, int numOfPlanes){
+        int[] outPut = new int[size];
+        double s = 255/Math.pow(2,numOfPlanes);
+        for (int i=0;i<size;i++){
+            if (input[i]<128){
+                outPut[i]=(int)(s*Math.floor((double)input[i]/s));
+            }else {
+                outPut[i]=(int)(s*Math.ceil((double)input[i]/s));
+            }
+        }
+        return outPut;
     }
 
 
