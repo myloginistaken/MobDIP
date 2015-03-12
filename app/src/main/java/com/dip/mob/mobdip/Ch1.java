@@ -28,7 +28,7 @@ import java.util.Iterator;
 public class Ch1 extends Fragment {
 
     private int menuID;
-    private TextView title;
+    private TextView title, seekBarLbl;
     private Bundle bundle; //need to collect data from MyActivity
     private View seekBarView;
     private SeekBar seekBar;
@@ -38,6 +38,7 @@ public class Ch1 extends Fragment {
     private ImageView theImage;
     private Bitmap bitmap, resultBmp;
     private Drawable drawable;
+    private View rootView;
 
     private enum Action {
         NN, BIC, BIL, LANC, BIT
@@ -50,20 +51,20 @@ public class Ch1 extends Fragment {
                              Bundle savedInstanceState) {
 
         layout = (DrawerLayout) getActivity().findViewById(R.id.drawer_layout);
-        View rootView = inflater.inflate(R.layout.fragment_ch1, container, false);
+        rootView = inflater.inflate(R.layout.fragment_ch1, container, false);
         bundle = getArguments();
         menuID = bundle.getInt("childPosition");
         title = (TextView) getActivity().findViewById(R.id.textView);
         title.setText(getResources().getStringArray(R.array.nav_drawer_kids1)[menuID]);
         title = (TextView) getActivity().findViewById(R.id.textView2);
+        seekBarLbl = (TextView) getActivity().findViewById(R.id.seekBarLbl);
         title.setText("");
 
-        seekBarView = getActivity().getLayoutInflater().inflate(R.layout.seekbar, null);
-        layout.addView(seekBarView);
+       // seekBarView = getActivity().getLayoutInflater().inflate(R.layout.seekbar, null);
+       // layout.addView(seekBarView);
         seekBar = (SeekBar) getActivity().findViewById(R.id.seekBar);
 
         theImage = (ImageView) getActivity().findViewById(R.id.image);
-        bitmap = ((BitmapDrawable) theImage.getDrawable()).getBitmap();
 
         switch (menuID){
             case 0:
@@ -80,8 +81,11 @@ public class Ch1 extends Fragment {
                 break;
             case 4:
                 currentAction=Action.BIT;
+                seekBar.setProgressDrawable(getResources().getDrawable(R.drawable.progressbar));
+                seekBar.setThumb(getResources().getDrawable(R.drawable.thumb));
                 seekBar.setMax(8);
                 seekBar.setProgress(8);
+                bitmap = ((BitmapDrawable) theImage.getDrawable()).getBitmap();
                 break;
         }
 
@@ -90,6 +94,9 @@ public class Ch1 extends Fragment {
         seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean b) {
+                seekBarLbl.setText(""+progress);
+                int seekLblPos = ((((seekBar.getRight() - seekBar.getLeft())*seekBar.getProgress())/seekBar.getMax())+seekBar.getLeft())-15;
+                seekBarLbl.setX(seekLblPos);
                 //Toast.makeText(getActivity(), "Progress: " + progress, Toast.LENGTH_SHORT).show();
                 switch (currentAction){
                     case NN:

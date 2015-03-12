@@ -56,7 +56,29 @@
                 android:id="@+id/image" />
         </RelativeLayout>
 
+        <SeekBar
+            android:id="@+id/seekBar"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="10dp"
+            android:layout_marginLeft="70dp"
+            android:layout_marginRight="30dp"
+            android:maxHeight="2dip"
+            android:progress="0"
+            android:layout_gravity="bottom|left"
+            android:thumb="@android:color/transparent"
+            android:progressDrawable="@android:color/transparent"
+            android:secondaryProgress="0"
+            >
+        </SeekBar>
 
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:id="@+id/seekBarLbl"
+            android:layout_gravity="bottom|left"
+            android:layout_marginBottom="40dp" />
 
         <android.view.ext.SatelliteMenu
             android:id="@+id/menu"
