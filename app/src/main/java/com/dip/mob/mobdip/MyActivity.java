@@ -3,7 +3,6 @@ package com.dip.mob.mobdip;
 import android.app.Activity;
 import android.app.Fragment;
 import android.app.FragmentManager;
-import android.content.Context;
 import android.content.Intent;
 import android.content.res.TypedArray;
 import android.database.Cursor;
@@ -11,6 +10,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
 import android.graphics.PointF;
+import android.graphics.RectF;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.ScaleDrawable;
@@ -21,36 +21,30 @@ import android.provider.MediaStore;
 import android.support.v4.widget.DrawerLayout;
 import android.util.Log;
 import android.util.TypedValue;
-import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
-import android.widget.AdapterView;
+import android.view.ext.SatelliteMenu;
+import android.view.ext.SatelliteMenuItem;
 import android.widget.Button;
 import android.widget.ExpandableListView;
 import android.widget.ImageView;
-import android.widget.ListView;
 import android.widget.RelativeLayout;
 import android.widget.SeekBar;
 import android.widget.TextView;
+
+import org.opencv.android.BaseLoaderCallback;
+import org.opencv.android.LoaderCallbackInterface;
+import org.opencv.android.OpenCVLoader;
+import org.opencv.android.Utils;
+import org.opencv.core.Mat;
+import org.opencv.imgproc.Imgproc;
 
 import java.io.File;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
-
-import android.view.ext.*;
-import android.widget.Toast;
-
-import org.opencv.android.BaseLoaderCallback;
-import org.opencv.android.LoaderCallbackInterface;
-import org.opencv.android.OpenCVLoader;
-import org.opencv.android.Utils;
-import org.opencv.core.CvType;
-import org.opencv.core.Mat;
-import org.opencv.imgproc.Imgproc;
 
 public class MyActivity extends Activity implements View.OnTouchListener {
 
@@ -191,6 +185,7 @@ public class MyActivity extends Activity implements View.OnTouchListener {
                         // Back to color image
                         colorImage = new BitmapDrawable(chosenImageColor);
                         theImage.setImageDrawable(colorImage);
+                        initialPos(theImage);
                         grayscaled=false;
                         break;
                     case 2:
@@ -233,6 +228,15 @@ public class MyActivity extends Activity implements View.OnTouchListener {
         theImage.setOnTouchListener(this);
     }
 
+
+        // FUNCTION that makes image middle and nice
+        public void initialPos(ImageView iv){
+            Matrix mat = new Matrix();
+            mat.setRectToRect(new RectF(iv.getDrawable().copyBounds()),new RectF(0,0,iv.getMeasuredWidth(),iv.getMeasuredHeight()),Matrix.ScaleToFit.CENTER);
+            iv.setImageMatrix(mat);
+            m = mat;
+        }
+
         // take photo and upload it to app
         public void grayscale(ImageView iv) {
             if (chosenImage!=null) {
@@ -242,6 +246,7 @@ public class MyActivity extends Activity implements View.OnTouchListener {
                 Utils.matToBitmap(gray, chosenImage);
                 image = new BitmapDrawable(chosenImage);
                 iv.setImageDrawable(image);
+
             }
         }
 
@@ -326,6 +331,7 @@ public class MyActivity extends Activity implements View.OnTouchListener {
                     image = new BitmapDrawable(chosenImage);
                     //relativeLayout.setBackgroundDrawable(image);
                     theImage.setImageDrawable(image);
+                    initialPos(theImage);
                     fromCamera = false;
                     title.setText("");
                     welcome.setText("");

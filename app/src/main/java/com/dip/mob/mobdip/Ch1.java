@@ -3,7 +3,6 @@ package com.dip.mob.mobdip;
 import android.app.Fragment;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
-import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.v4.widget.DrawerLayout;
@@ -11,21 +10,20 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
-import android.widget.RelativeLayout;
 import android.widget.SeekBar;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import org.opencv.android.Utils;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
 import org.opencv.imgproc.Imgproc;
 
-import java.util.Iterator;
-
 
 //Class to handle Chapter 1 image transformations
 public class Ch1 extends Fragment {
+
+
+    private int[][] table = new int[9][256]; //for faster bitplane slicing
 
     private int menuID;
     private TextView title, seekBarLbl;
@@ -60,8 +58,32 @@ public class Ch1 extends Fragment {
         seekBarLbl = (TextView) getActivity().findViewById(R.id.seekBarLbl);
         title.setText("");
 
-       // seekBarView = getActivity().getLayoutInflater().inflate(R.layout.seekbar, null);
-       // layout.addView(seekBarView);
+
+
+        //creates the table for bitplane slicing
+        int s;
+        for (int j = 2; j<9;j++){
+            s = (int)Math.pow(2,8-j);
+            for (int i=0;i<256;i++)
+                table[j][i]=(i/s)*s;
+        }
+        for (int i=0;i<128;i++)
+            table[1][i]=0;
+        for (int i=128;i<256;i++)
+            table[1][i]=255;
+        // for (int i=0;i<256;i++) //not necessary as it never gets to zero
+        //   table[0][i]=0;
+        //end of creating table
+
+
+        return rootView;
+
+        // seekBarView = getActivity().getLayoutInflater().inflate(R.layout.seekbar, null);
+        // layout.addView(seekBarView);
+
+    }
+    public void onResume(){
+        super.onResume();
         seekBar = (SeekBar) getActivity().findViewById(R.id.seekBar);
 
         theImage = (ImageView) getActivity().findViewById(R.id.image);
@@ -86,6 +108,7 @@ public class Ch1 extends Fragment {
                 seekBar.setMax(8);
                 seekBar.setProgress(8);
                 bitmap = ((BitmapDrawable) theImage.getDrawable()).getBitmap();
+
                 break;
         }
 
@@ -147,6 +170,7 @@ public class Ch1 extends Fragment {
                         Utils.matToBitmap(oneBit, resultBmp);
                         drawable = new BitmapDrawable(resultBmp);
                         theImage.setImageDrawable(drawable);
+
                         break;
                 }
 
@@ -165,10 +189,20 @@ public class Ch1 extends Fragment {
 
 
 
-        return rootView;
     }
 
+
     private int[] bitPlaneSlice(int[] input, int size, int numOfPlanes){
+        int[] outPut = new int[size];
+        for (int i=0;i<size;i++){
+                outPut[i]=table[numOfPlanes][input[i]];
+
+        }
+
+        return outPut;
+    }
+
+    private int[] bitPlaneSliceNana(int[] input, int size, int numOfPlanes){
         int[] outPut = new int[size];
         double s = 255/Math.pow(2,numOfPlanes);
         for (int i=0;i<size;i++){
