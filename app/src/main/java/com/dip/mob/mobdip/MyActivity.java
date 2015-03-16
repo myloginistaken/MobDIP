@@ -302,7 +302,7 @@ public class MyActivity extends Activity implements View.OnTouchListener {
             );
 
             // Save a file: path for use with ACTION_VIEW intents
-            mCurrentPhotoPath = "file:" + image.getAbsolutePath();
+            mCurrentPhotoPath = image.getAbsolutePath();
             return image;
         }
 
@@ -354,12 +354,13 @@ public class MyActivity extends Activity implements View.OnTouchListener {
                     // Put it in the image view
                     if (cursor.moveToFirst()) {
                         final RelativeLayout relativeLayout = (RelativeLayout) findViewById(R.id.relativeLayout);
-                        imageLocation = cursor.getString(1);
-                        File imageFile = new File(imageLocation);
+                        //imageLocation = cursor.getString(1);
+                        //Log.e("MyActivity", imageLocation+" ------------ "+mCurrentPhotoPath);
+                        File imageFile = new File(mCurrentPhotoPath);
                         if (imageFile.exists()) {
-                            chosenImage = BitmapFactory.decodeFile(imageLocation);
+                            chosenImage = BitmapFactory.decodeFile(mCurrentPhotoPath);
 
-                            chosenImageColor = BitmapFactory.decodeFile(imageLocation);
+                            chosenImageColor = BitmapFactory.decodeFile(mCurrentPhotoPath);
                             colorImage = new BitmapDrawable(chosenImageColor);
 
                             image = new BitmapDrawable(chosenImage);
