@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.app.Fragment;
 import android.app.FragmentManager;
 import android.content.Intent;
+import android.content.pm.ActivityInfo;
 import android.content.res.TypedArray;
 import android.database.Cursor;
 import android.graphics.Bitmap;
@@ -56,7 +57,6 @@ public class MyActivity extends Activity implements View.OnTouchListener {
     private boolean grayscaled = false;
     private boolean fromCamera = false;
     private String filePath;
-    private String imageLocation;
 
     private Bitmap chosenImage = null;
     private Bitmap chosenImageColor = null;
@@ -303,6 +303,7 @@ public class MyActivity extends Activity implements View.OnTouchListener {
 
             // Save a file: path for use with ACTION_VIEW intents
             mCurrentPhotoPath = image.getAbsolutePath();
+            //Log.e("MyActivity", mCurrentPhotoPath);
             return image;
         }
 
@@ -339,6 +340,7 @@ public class MyActivity extends Activity implements View.OnTouchListener {
                 }
             case CAMERA_DATA :
                 if (requestCode == CAMERA_DATA){
+                    //this.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
                     // Find the last picture
                     String[] projection = new String[]{
                             MediaStore.Images.ImageColumns._ID,
@@ -354,8 +356,7 @@ public class MyActivity extends Activity implements View.OnTouchListener {
                     // Put it in the image view
                     if (cursor.moveToFirst()) {
                         final RelativeLayout relativeLayout = (RelativeLayout) findViewById(R.id.relativeLayout);
-                        //imageLocation = cursor.getString(1);
-                        //Log.e("MyActivity", imageLocation+" ------------ "+mCurrentPhotoPath);
+
                         File imageFile = new File(mCurrentPhotoPath);
                         if (imageFile.exists()) {
                             chosenImage = BitmapFactory.decodeFile(mCurrentPhotoPath);
@@ -365,6 +366,7 @@ public class MyActivity extends Activity implements View.OnTouchListener {
 
                             image = new BitmapDrawable(chosenImage);
                             theImage.setImageDrawable(image);
+                            initialPos(theImage);
                             fromCamera = true;
                         }
                     }
@@ -384,7 +386,7 @@ public class MyActivity extends Activity implements View.OnTouchListener {
             outState.putBoolean("ifGrayscaled", grayscaled);
             outState.putBoolean("ifFromCamera", fromCamera);
             outState.putString("pathToFileGallery", filePath);
-            outState.putString("pathToFileCamera", imageLocation);
+            outState.putString("pathToFileCamera", mCurrentPhotoPath);
         }
     }
 
@@ -395,10 +397,10 @@ public class MyActivity extends Activity implements View.OnTouchListener {
         grayscaled = savedInstanceState.getBoolean("ifGrayscaled");
         fromCamera = savedInstanceState.getBoolean("ifFromCamera");
         filePath = savedInstanceState.getString("pathToFileGallery");
-        imageLocation = savedInstanceState.getString("pathToFileCamera");
+        mCurrentPhotoPath = savedInstanceState.getString("pathToFileCamera");
 
         if (fromCamera){
-            chosenImageColor = BitmapFactory.decodeFile(imageLocation);
+            chosenImageColor = BitmapFactory.decodeFile(mCurrentPhotoPath);
         }else {
             chosenImageColor = BitmapFactory.decodeFile(filePath);
         }
@@ -408,7 +410,6 @@ public class MyActivity extends Activity implements View.OnTouchListener {
         } else {
             image = new BitmapDrawable(chosenImageColor);
         }
-
         theImage.setImageDrawable(image);
 
     }
