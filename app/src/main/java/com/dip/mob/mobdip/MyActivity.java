@@ -4,7 +4,6 @@ import android.app.Activity;
 import android.app.Fragment;
 import android.app.FragmentManager;
 import android.content.Intent;
-import android.content.pm.ActivityInfo;
 import android.content.res.TypedArray;
 import android.database.Cursor;
 import android.graphics.Bitmap;
@@ -49,8 +48,9 @@ import java.util.List;
 
 public class MyActivity extends Activity implements View.OnTouchListener {
 
-    private Button gallery, camera;
-    private Drawable colorImage, image;
+    static MyActivity activity;
+
+    private Drawable image;
     private ScaleDrawable sc;
     private ImageView theImage;
     private boolean imageSet = false;
@@ -59,8 +59,9 @@ public class MyActivity extends Activity implements View.OnTouchListener {
     private String filePath;
 
     private Bitmap chosenImage = null;
-    private Bitmap chosenImageColor = null;
+    private Bitmap chosenImageColor = null, chosenImageGray;
     private static final int IMAGE_CHOSEN = 1;
+    private int imgCnt = 0;
     private TextView title, welcome, info;
 
     private static final int CAMERA_DATA = 2;
@@ -108,6 +109,7 @@ public class MyActivity extends Activity implements View.OnTouchListener {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        activity=this;
         setContentView(R.layout.activity_my);
 
         m = new Matrix();
@@ -183,14 +185,13 @@ public class MyActivity extends Activity implements View.OnTouchListener {
                 switch (id){
                     case 1:
                         // Back to color image
-                        colorImage = new BitmapDrawable(chosenImageColor);
-                        theImage.setImageDrawable(colorImage);
+                        theImage.setImageDrawable(new BitmapDrawable(chosenImageColor));
                         initialPos(theImage);
                         grayscaled=false;
                         break;
                     case 2:
                         // Grayscale image
-                        grayscale(theImage);
+                        theImage.setImageDrawable(new BitmapDrawable(chosenImageGray));
                         grayscaled=true;
                         break;
                     case 3:
@@ -199,10 +200,12 @@ public class MyActivity extends Activity implements View.OnTouchListener {
                     case 4:
                         dispatchTakePictureIntent();
                         break;
+                    case 6:
+                        break;
                     case 7:
                         info.setText("This app has been developed by a magic trio in order to illustrate different image processing techniques learnt in the course Digital Image Processing");
                 }
-                //Toast.makeText(MyActivity.this, "Clicked on " + id, Toast.LENGTH_LONG).show();
+                //Toast.makeText(MyActivity.this, "Clicked on " + id, Toast.LENGTH_SHORT).show();
             }
         });
 
@@ -237,17 +240,15 @@ public class MyActivity extends Activity implements View.OnTouchListener {
             m = mat;
         }
 
-        // take photo and upload it to app
-        public void grayscale(ImageView iv) {
-            if (chosenImage!=null) {
-                Mat gray = new Mat();
-                Utils.bitmapToMat(chosenImage, gray);
-                Imgproc.cvtColor(gray, gray, Imgproc.COLOR_RGB2GRAY);
-                Utils.matToBitmap(gray, chosenImage);
-                image = new BitmapDrawable(chosenImage);
-                iv.setImageDrawable(image);
+        // Grayscale bitmap
+        public Bitmap grayscale(Bitmap bm) {
+            Bitmap grayImage = bm.copy(Bitmap.Config.ARGB_8888, true);
+            Mat gray = new Mat();
+            Utils.bitmapToMat(grayImage, gray);
+            Imgproc.cvtColor(gray, gray, Imgproc.COLOR_RGB2GRAY);
+            Utils.matToBitmap(gray, grayImage);
 
-            }
+            return grayImage;
         }
 
         // upload picture from gallery
@@ -324,18 +325,16 @@ public class MyActivity extends Activity implements View.OnTouchListener {
                     filePath = cursor.getString(colInd);
                     cursor.close();
 
-                    chosenImage = BitmapFactory.decodeFile(filePath);
-
                     chosenImageColor = BitmapFactory.decodeFile(filePath);
-                    colorImage = new BitmapDrawable(chosenImageColor);
+                    chosenImageGray = grayscale(chosenImageColor);
 
-                    image = new BitmapDrawable(chosenImage);
-                    //relativeLayout.setBackgroundDrawable(image);
-                    theImage.setImageDrawable(image);
+                    theImage.setImageDrawable(new BitmapDrawable(chosenImageColor));
                     initialPos(theImage);
+                    imgCnt += 1;
                     fromCamera = false;
                     title.setText("");
                     welcome.setText("");
+
                     info.setText("");
                 }
             case CAMERA_DATA :
@@ -362,11 +361,11 @@ public class MyActivity extends Activity implements View.OnTouchListener {
                             chosenImage = BitmapFactory.decodeFile(mCurrentPhotoPath);
 
                             chosenImageColor = BitmapFactory.decodeFile(mCurrentPhotoPath);
-                            colorImage = new BitmapDrawable(chosenImageColor);
+                            chosenImageGray = grayscale(chosenImageColor);
 
-                            image = new BitmapDrawable(chosenImage);
-                            theImage.setImageDrawable(image);
+                            theImage.setImageDrawable(new BitmapDrawable(chosenImageColor));
                             initialPos(theImage);
+                            imgCnt += 1;
                             fromCamera = true;
                         }
                     }
@@ -382,7 +381,8 @@ public class MyActivity extends Activity implements View.OnTouchListener {
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
         if ((BitmapDrawable)theImage.getDrawable()!=null) {
-            outState.putParcelable("image", ((BitmapDrawable) theImage.getDrawable()).getBitmap());
+            outState.putParcelable("chosenImageColor", chosenImageColor);
+            outState.putParcelable("chosenImageGray", chosenImageGray);
             outState.putBoolean("ifGrayscaled", grayscaled);
             outState.putBoolean("ifFromCamera", fromCamera);
             outState.putString("pathToFileGallery", filePath);
@@ -393,24 +393,16 @@ public class MyActivity extends Activity implements View.OnTouchListener {
     @Override
     public void onRestoreInstanceState(Bundle savedInstanceState) {
         super.onRestoreInstanceState(savedInstanceState);
-        chosenImage = savedInstanceState.getParcelable("image");
+        chosenImageColor = savedInstanceState.getParcelable("chosenImageColor");
+        chosenImageGray = savedInstanceState.getParcelable("chosenImageGray");
         grayscaled = savedInstanceState.getBoolean("ifGrayscaled");
-        fromCamera = savedInstanceState.getBoolean("ifFromCamera");
-        filePath = savedInstanceState.getString("pathToFileGallery");
-        mCurrentPhotoPath = savedInstanceState.getString("pathToFileCamera");
-
-        if (fromCamera){
-            chosenImageColor = BitmapFactory.decodeFile(mCurrentPhotoPath);
-        }else {
-            chosenImageColor = BitmapFactory.decodeFile(filePath);
-        }
 
         if (grayscaled) {
-            image = new BitmapDrawable(chosenImage);
+            theImage.setImageDrawable(new BitmapDrawable(chosenImageGray));
         } else {
-            image = new BitmapDrawable(chosenImageColor);
+            theImage.setImageDrawable(new BitmapDrawable(chosenImageColor));
         }
-        theImage.setImageDrawable(image);
+
 
     }
 
@@ -548,5 +540,17 @@ public class MyActivity extends Activity implements View.OnTouchListener {
         theImage.setImageMatrix(m);
 
         return true;
+    }
+
+    public static MyActivity getInstance(){
+        return activity;
+    }
+
+    public int getImgCnt() {
+        return imgCnt;
+    }
+
+    public void setImgCnt(int imgCnt) {
+        this.imgCnt = imgCnt;
     }
 }
