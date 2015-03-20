@@ -12,6 +12,7 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.SeekBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import org.opencv.android.Utils;
 import org.opencv.core.CvType;
@@ -32,6 +33,7 @@ public class Ch1 extends Fragment {
     private SeekBar seekBar;
     private DrawerLayout layout;
     private Action currentAction;
+    private int imgCnt;
 
     private ImageView theImage;
     private Bitmap bitmap, resultBmp;
@@ -58,8 +60,6 @@ public class Ch1 extends Fragment {
         seekBarLbl = (TextView) getActivity().findViewById(R.id.seekBarLbl);
         title.setText("");
 
-
-
         //creates the table for bitplane slicing
         int s;
         for (int j = 2; j<9;j++){
@@ -77,9 +77,6 @@ public class Ch1 extends Fragment {
 
 
         return rootView;
-
-        // seekBarView = getActivity().getLayoutInflater().inflate(R.layout.seekbar, null);
-        // layout.addView(seekBarView);
 
     }
     public void onResume(){
@@ -108,7 +105,7 @@ public class Ch1 extends Fragment {
                 seekBar.setMax(8);
                 seekBar.setProgress(8);
                 bitmap = ((BitmapDrawable) theImage.getDrawable()).getBitmap();
-
+                imgCnt = MyActivity.getInstance().getImgCnt();
                 break;
         }
 
@@ -178,6 +175,11 @@ public class Ch1 extends Fragment {
 
             @Override
             public void onStartTrackingTouch(SeekBar seekBar) {
+                int currentImgCnt = MyActivity.getInstance().getImgCnt();
+                if(imgCnt!=currentImgCnt){
+                    bitmap = ((BitmapDrawable) theImage.getDrawable()).getBitmap();
+                    imgCnt = currentImgCnt;
+                }
 
             }
 
