@@ -23,11 +23,11 @@ import android.widget.Toast;
 
 public class NavDrawerListAdapter extends BaseExpandableListAdapter {
 
-    private ArrayList<ArrayList<String>> mGroups;
-    private ArrayList<String> groupNames;
+    private ArrayList<String[]> mGroups;
+    private String[] groupNames;
     private Context mContext;
 
-    public NavDrawerListAdapter (Context context,ArrayList<ArrayList<String>> groups, ArrayList<String> names){
+    public NavDrawerListAdapter (Context context,ArrayList<String[]> groups, String[] names){
         mContext = context;
         mGroups = groups;
         groupNames = names;
@@ -40,7 +40,7 @@ public class NavDrawerListAdapter extends BaseExpandableListAdapter {
 
     @Override
     public int getChildrenCount(int groupPosition) {
-        return mGroups.get(groupPosition).size();
+        return mGroups.get(groupPosition).length;
     }
 
     @Override
@@ -50,7 +50,7 @@ public class NavDrawerListAdapter extends BaseExpandableListAdapter {
 
     @Override
     public Object getChild(int groupPosition, int childPosition) {
-        return mGroups.get(groupPosition).get(childPosition);
+        return mGroups.get(groupPosition)[childPosition];
     }
 
     @Override
@@ -85,7 +85,7 @@ public class NavDrawerListAdapter extends BaseExpandableListAdapter {
         }
 
         TextView textGroup = (TextView) convertView.findViewById(R.id.textGroup);
-        textGroup.setText(groupNames.get(groupPosition));
+        textGroup.setText(groupNames[groupPosition]);
 
         return convertView;
 
@@ -100,7 +100,7 @@ public class NavDrawerListAdapter extends BaseExpandableListAdapter {
         }
 
         TextView textChild = (TextView) convertView.findViewById(R.id.textChild);
-        textChild.setText(mGroups.get(groupPosition).get(childPosition));
+        textChild.setText(mGroups.get(groupPosition)[childPosition]);
 
         return convertView;
     }

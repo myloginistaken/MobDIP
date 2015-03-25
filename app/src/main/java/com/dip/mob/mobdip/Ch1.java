@@ -29,7 +29,7 @@ public class Ch1 extends Fragment {
     private int menuID;
     private TextView title, seekBarLbl;
     private Bundle bundle; //need to collect data from MyActivity
-    private View seekBarView;
+    //private View seekBarView;
     private SeekBar seekBar;
     private DrawerLayout layout;
     private Action currentAction;

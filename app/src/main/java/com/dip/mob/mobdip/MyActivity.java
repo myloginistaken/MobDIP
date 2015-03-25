@@ -41,6 +41,7 @@ import org.opencv.imgproc.Imgproc;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.Array;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -89,13 +90,11 @@ public class MyActivity extends Activity implements View.OnTouchListener {
 
     // slide menu items
     private String[] navMenuTitles;
-    private TypedArray navMenuIcons;
-    private SeekBar seekBar;
+    //private TypedArray navMenuIcons;
+    //private SeekBar seekBar;
 
-    private ArrayList<ArrayList<String>> groups;
-    private ArrayList<String> groupNames, chapter1, chapter2, chapter3, chapter4;
-
-    private NavDrawerListAdapter adapter;
+    private ArrayList<String[]> groups;
+    private String [] groupNames, chapter1, chapter2, chapter3, chapter4;
 
 
     private RelativeLayout relativeLayout;
@@ -128,31 +127,13 @@ public class MyActivity extends Activity implements View.OnTouchListener {
         mDrawerList = (ExpandableListView) findViewById(R.id.list_slidermenu);
 
         //Make data for NavDrawerListAdapter - groups and buttons in sliding menu
-        //TODO:Fill arrays with loops
-        groups = new ArrayList<ArrayList<String>>();
-        groupNames = new ArrayList<String>();
-        groupNames.add(getResources().getStringArray(R.array.nav_drawer_groups)[0]);
-        groupNames.add(getResources().getStringArray(R.array.nav_drawer_groups)[1]);
-        groupNames.add(getResources().getStringArray(R.array.nav_drawer_groups)[2]);
-        chapter1 = new ArrayList<String>();
-        chapter2 = new ArrayList<String>();
-        chapter3 = new ArrayList<String>();
-        chapter4 = new ArrayList<String>();
-        chapter1.add(getResources().getStringArray(R.array.nav_drawer_kids1)[0]);
-        chapter1.add(getResources().getStringArray(R.array.nav_drawer_kids1)[1]);
-        chapter1.add(getResources().getStringArray(R.array.nav_drawer_kids1)[2]);
-        chapter1.add(getResources().getStringArray(R.array.nav_drawer_kids1)[3]);
-        chapter1.add(getResources().getStringArray(R.array.nav_drawer_kids1)[4]);
+        groups = new ArrayList<String[]>();
+        groupNames = getResources().getStringArray(R.array.nav_drawer_groups);
+        chapter1 = getResources().getStringArray(R.array.nav_drawer_kids1);
         groups.add(chapter1);
-        chapter2.add(getResources().getStringArray(R.array.nav_drawer_kids2)[0]);
-        chapter2.add(getResources().getStringArray(R.array.nav_drawer_kids2)[1]);
-        chapter2.add(getResources().getStringArray(R.array.nav_drawer_kids2)[2]);
-        chapter2.add(getResources().getStringArray(R.array.nav_drawer_kids2)[3]);
-        chapter2.add(getResources().getStringArray(R.array.nav_drawer_kids2)[4]);
+        chapter2 = getResources().getStringArray(R.array.nav_drawer_kids2);
         groups.add(chapter2);
-        chapter3.add(getResources().getStringArray(R.array.nav_drawer_kids3)[0]);
-        chapter3.add(getResources().getStringArray(R.array.nav_drawer_kids3)[1]);
-        chapter3.add(getResources().getStringArray(R.array.nav_drawer_kids3)[2]);
+        chapter3 = getResources().getStringArray(R.array.nav_drawer_kids3);
         groups.add(chapter3);
 
         //Make adapter and give it the list of data
@@ -203,7 +184,7 @@ public class MyActivity extends Activity implements View.OnTouchListener {
                     case 6:
                         break;
                     case 7:
-                        info.setText("This app has been developed by a magic trio in order to illustrate different image processing techniques learnt in the course Digital Image Processing");
+                        info.setText(getResources().getString(R.string.textInfo));
                 }
                 //Toast.makeText(MyActivity.this, "Clicked on " + id, Toast.LENGTH_SHORT).show();
             }
@@ -224,8 +205,8 @@ public class MyActivity extends Activity implements View.OnTouchListener {
 
         if(theImage.getDrawable() == null){
 
-            title.setText("MobDIP");
-            welcome.setText("Welcome to Digital Image Processing App");
+            title.setText(getResources().getString(R.string.app_name));
+            welcome.setText(getResources().getString(R.string.welcome));
         }
 
         theImage.setOnTouchListener(this);
@@ -286,7 +267,7 @@ public class MyActivity extends Activity implements View.OnTouchListener {
 
         private File createImageFile() throws IOException {
             // Create an image file name
-            String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
+            String timeStamp = new SimpleDateFormat("yyyy.MM.dd_HH.mm.ss").format(new Date());
             String imageFileName = "DIP_" + timeStamp + "_";
             File storageDir = new File(Environment.getExternalStoragePublicDirectory(
                     Environment.DIRECTORY_DCIM), "MobDIP");

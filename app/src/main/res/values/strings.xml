@@ -7,8 +7,9 @@
     <!-- MAIN MENU -->
     <string name="upload">Upload image</string>
     <string name="camera">Take photo</string>
-    <string name="drawer_open">Slider Menu Opened</string>
-    <string name="drawer_close">Slider Menu Closed</string>
+    <string name="textInfo">This app has been developed by a magic trio in order to illustrate different image processing
+        techniques learnt in the course Digital Image Processing</string>
+    <string name="welcome">Welcome to Digital Image Processing App</string>
 
     <!-- Nav Drawer Menu Items -->
     <string-array name="nav_drawer_groups">
