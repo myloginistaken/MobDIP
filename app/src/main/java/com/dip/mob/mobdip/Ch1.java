@@ -60,6 +60,7 @@ public class Ch1 extends Fragment {
         seekBarLbl = (TextView) getActivity().findViewById(R.id.seekBarLbl);
         title.setText("");
 
+        //TODO:Need optimization here
         //creates the table for bitplane slicing
         int s;
         for (int j = 2; j<9;j++){
@@ -84,28 +85,27 @@ public class Ch1 extends Fragment {
         seekBar = (SeekBar) getActivity().findViewById(R.id.seekBar);
 
         theImage = (ImageView) getActivity().findViewById(R.id.image);
-
+        //TODO: NEED to save original image, to restore it, if performing another interpolation
         switch (menuID){
             case 0:
                 currentAction=Action.NN;
+                seekBarInit(8, 4);
                 break;
             case 1:
                 currentAction=Action.BIC;
+                seekBarInit(8, 4);
                 break;
             case 2:
                 currentAction=Action.BIL;
+                seekBarInit(8, 4);
                 break;
             case 3:
                 currentAction=Action.LANC;
+                seekBarInit(8, 4);
                 break;
             case 4:
                 currentAction=Action.BIT;
-                seekBar.setProgressDrawable(getResources().getDrawable(R.drawable.progressbar));
-                seekBar.setThumb(getResources().getDrawable(R.drawable.thumb));
-                seekBar.setMax(8);
-                seekBar.setProgress(8);
-                bitmap = ((BitmapDrawable) theImage.getDrawable()).getBitmap();
-                imgCnt = MyActivity.getInstance().getImgCnt();
+                seekBarInit(8, 8);
                 break;
         }
 
@@ -118,22 +118,27 @@ public class Ch1 extends Fragment {
                 int seekLblPos = ((((seekBar.getRight() - seekBar.getLeft())*seekBar.getProgress())/seekBar.getMax())+seekBar.getLeft())-15;
                 seekBarLbl.setX(seekLblPos);
                 //Toast.makeText(getActivity(), "Progress: " + progress, Toast.LENGTH_SHORT).show();
+                Mat oneBit = new Mat();
+                Utils.bitmapToMat(bitmap, oneBit);
                 switch (currentAction){
                     case NN:
                         // Interpolate by the factor of progress
+                        interpolate(oneBit, progress, Imgproc.INTER_NEAREST);
+                        //Toast.makeText(getActivity(), "Size: " + resultingImage.size(), Toast.LENGTH_SHORT).show();
                         break;
                     case BIC:
                         // Interpolate by the factor of progress
+                        interpolate(oneBit, progress, Imgproc.INTER_CUBIC);
                         break;
                     case BIL:
                         // Interpolate by the factor of progress
+                        interpolate(oneBit, progress, Imgproc.INTER_LINEAR);
                         break;
                     case LANC:
                         // Interpolate by the factor of progress
+                        interpolate(oneBit, progress, Imgproc.INTER_LANCZOS4);
                         break;
                     case BIT:
-                        Mat oneBit = new Mat();
-                        Utils.bitmapToMat(bitmap, oneBit);
                         resultBmp = bitmap.copy(Bitmap.Config.ARGB_8888, true);
                         Imgproc.cvtColor(oneBit, oneBit, Imgproc.COLOR_RGB2GRAY);
                         oneBit.convertTo(oneBit, CvType.CV_32S);
@@ -193,6 +198,30 @@ public class Ch1 extends Fragment {
 
     }
 
+    private void seekBarInit(int max, int current){
+        seekBar.setProgressDrawable(getResources().getDrawable(R.drawable.progressbar));
+        seekBar.setThumb(getResources().getDrawable(R.drawable.thumb));
+        seekBar.setMax(max);
+        seekBar.setProgress(current);
+        bitmap = ((BitmapDrawable) theImage.getDrawable()).getBitmap();
+        imgCnt = MyActivity.getInstance().getImgCnt();
+    }
+
+    private void interpolate(Mat origImage, int seekBarProg, int interpolation){
+        int zoomingFactor;
+        if (seekBarProg>0) {
+            zoomingFactor = seekBarProg;
+        } else {
+            zoomingFactor=1;
+        }
+        Mat resultingImage = new Mat(origImage.rows()*zoomingFactor, origImage.cols()*zoomingFactor, origImage.type());
+        Imgproc.resize(origImage, resultingImage, resultingImage.size(), zoomingFactor, zoomingFactor, interpolation);
+        resultBmp = Bitmap.createBitmap(resultingImage.width(), resultingImage.height(), Bitmap.Config.ARGB_8888);
+        Utils.matToBitmap(resultingImage, resultBmp);
+        drawable = new BitmapDrawable(resultBmp);
+        theImage.setImageDrawable(drawable);
+    }
+
 
     private int[] bitPlaneSlice(int[] input, int size, int numOfPlanes){
         int[] outPut = new int[size];
@@ -203,7 +232,7 @@ public class Ch1 extends Fragment {
 
         return outPut;
     }
-
+    //TODO: Why is it here, if it is never used?
     private int[] bitPlaneSliceNana(int[] input, int size, int numOfPlanes){
         int[] outPut = new int[size];
         double s = 255/Math.pow(2,numOfPlanes);
@@ -216,6 +245,7 @@ public class Ch1 extends Fragment {
         }
         return outPut;
     }
+
 
 
 }
