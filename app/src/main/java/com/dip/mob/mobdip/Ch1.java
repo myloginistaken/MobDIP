@@ -23,7 +23,7 @@ import org.opencv.imgproc.Imgproc;
 //Class to handle Chapter 1 image transformations
 public class Ch1 extends Fragment {
 
-
+    // the code is looking at you! 0_0
     private int[][] table = new int[9][256]; //for faster bitplane slicing
 
     private int menuID;
@@ -36,7 +36,7 @@ public class Ch1 extends Fragment {
     private int imgCnt;
 
     private ImageView theImage;
-    private Bitmap bitmap, resultBmp;
+    private Bitmap bitmap, resultBmp, origin;
     private Drawable drawable;
     private View rootView;
 
@@ -59,8 +59,8 @@ public class Ch1 extends Fragment {
         title = (TextView) getActivity().findViewById(R.id.textView2);
         seekBarLbl = (TextView) getActivity().findViewById(R.id.seekBarLbl);
         title.setText("");
+        origin = MyActivity.getOrigin();
 
-        //TODO:Need optimization here
         //creates the table for bitplane slicing
         int s;
         for (int j = 2; j<9;j++){
@@ -85,23 +85,23 @@ public class Ch1 extends Fragment {
         seekBar = (SeekBar) getActivity().findViewById(R.id.seekBar);
 
         theImage = (ImageView) getActivity().findViewById(R.id.image);
-        //TODO: NEED to save original image, to restore it, if performing another interpolation
+        //TODO: NEED to get original image size and adjust seekBar for it
         switch (menuID){
             case 0:
                 currentAction=Action.NN;
-                seekBarInit(8, 4);
+                seekBarInit(8, 1);
                 break;
             case 1:
                 currentAction=Action.BIC;
-                seekBarInit(8, 4);
+                seekBarInit(8, 1);
                 break;
             case 2:
                 currentAction=Action.BIL;
-                seekBarInit(8, 4);
+                seekBarInit(8, 1);
                 break;
             case 3:
                 currentAction=Action.LANC;
-                seekBarInit(8, 4);
+                seekBarInit(8, 1);
                 break;
             case 4:
                 currentAction=Action.BIT;
@@ -118,27 +118,27 @@ public class Ch1 extends Fragment {
                 int seekLblPos = ((((seekBar.getRight() - seekBar.getLeft())*seekBar.getProgress())/seekBar.getMax())+seekBar.getLeft())-15;
                 seekBarLbl.setX(seekLblPos);
                 //Toast.makeText(getActivity(), "Progress: " + progress, Toast.LENGTH_SHORT).show();
-                Mat oneBit = new Mat();
-                Utils.bitmapToMat(bitmap, oneBit);
                 switch (currentAction){
                     case NN:
                         // Interpolate by the factor of progress
-                        interpolate(oneBit, progress, Imgproc.INTER_NEAREST);
+                        interpolate(progress, Imgproc.INTER_NEAREST);
                         //Toast.makeText(getActivity(), "Size: " + resultingImage.size(), Toast.LENGTH_SHORT).show();
                         break;
                     case BIC:
                         // Interpolate by the factor of progress
-                        interpolate(oneBit, progress, Imgproc.INTER_CUBIC);
+                        interpolate(progress, Imgproc.INTER_CUBIC);
                         break;
                     case BIL:
                         // Interpolate by the factor of progress
-                        interpolate(oneBit, progress, Imgproc.INTER_LINEAR);
+                        interpolate(progress, Imgproc.INTER_LINEAR);
                         break;
                     case LANC:
                         // Interpolate by the factor of progress
-                        interpolate(oneBit, progress, Imgproc.INTER_LANCZOS4);
+                        interpolate(progress, Imgproc.INTER_LANCZOS4);
                         break;
                     case BIT:
+                        Mat oneBit = new Mat();
+                        Utils.bitmapToMat(bitmap, oneBit);
                         resultBmp = bitmap.copy(Bitmap.Config.ARGB_8888, true);
                         Imgproc.cvtColor(oneBit, oneBit, Imgproc.COLOR_RGB2GRAY);
                         oneBit.convertTo(oneBit, CvType.CV_32S);
@@ -207,7 +207,12 @@ public class Ch1 extends Fragment {
         imgCnt = MyActivity.getInstance().getImgCnt();
     }
 
-    private void interpolate(Mat origImage, int seekBarProg, int interpolation){
+    private void interpolate(int seekBarProg, int interpolation){
+        //restore the original image
+        Mat origImage = new Mat();
+        Utils.bitmapToMat(origin, origImage);
+        theImage.setImageDrawable(new BitmapDrawable(origin));
+
         int zoomingFactor;
         if (seekBarProg>0) {
             zoomingFactor = seekBarProg;
@@ -232,20 +237,5 @@ public class Ch1 extends Fragment {
 
         return outPut;
     }
-    //TODO: Why is it here, if it is never used?
-    private int[] bitPlaneSliceNana(int[] input, int size, int numOfPlanes){
-        int[] outPut = new int[size];
-        double s = 255/Math.pow(2,numOfPlanes);
-        for (int i=0;i<size;i++){
-            if (input[i]<128){
-                outPut[i]=(int)(s*Math.floor((double)input[i]/s));
-            }else {
-                outPut[i]=(int)(s*Math.ceil((double)input[i]/s));
-            }
-        }
-        return outPut;
-    }
-
-
 
 }

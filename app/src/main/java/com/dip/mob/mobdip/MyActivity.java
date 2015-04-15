@@ -61,6 +61,7 @@ public class MyActivity extends Activity implements View.OnTouchListener {
 
     private Bitmap chosenImage = null;
     private Bitmap chosenImageColor = null, chosenImageGray;
+    private static Bitmap origin;
     private static final int IMAGE_CHOSEN = 1;
     private int imgCnt = 0;
     private TextView title, welcome, info;
@@ -102,7 +103,6 @@ public class MyActivity extends Activity implements View.OnTouchListener {
     // Chapter 1 selected onCreate by default
     //NO!
     private int chapterSelected = 1;
-
     private int vd;
 
     @Override
@@ -308,6 +308,7 @@ public class MyActivity extends Activity implements View.OnTouchListener {
 
                     chosenImageColor = BitmapFactory.decodeFile(filePath);
                     chosenImageGray = grayscale(chosenImageColor);
+                    origin = chosenImageColor.copy(chosenImageColor.getConfig(), true);
 
                     theImage.setImageDrawable(new BitmapDrawable(chosenImageColor));
                     initialPos(theImage);
@@ -533,5 +534,9 @@ public class MyActivity extends Activity implements View.OnTouchListener {
 
     public void setImgCnt(int imgCnt) {
         this.imgCnt = imgCnt;
+    }
+
+    public static Bitmap getOrigin(){
+        return origin;
     }
 }
