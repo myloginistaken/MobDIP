@@ -71,7 +71,7 @@ public class MyActivity extends Activity implements View.OnTouchListener {
     private String mCurrentPhotoPath;
 
     // For zoom
-    private Matrix m;
+    private static Matrix m;
     private Matrix initm;
     private Action act;
     private PointF start;
@@ -214,7 +214,7 @@ public class MyActivity extends Activity implements View.OnTouchListener {
 
 
         // FUNCTION that makes image middle and nice
-        public void initialPos(ImageView iv){
+        public static void initialPos(ImageView iv){
             Matrix mat = new Matrix();
             mat.setRectToRect(new RectF(iv.getDrawable().copyBounds()),new RectF(0,0,iv.getMeasuredWidth(),iv.getMeasuredHeight()),Matrix.ScaleToFit.CENTER);
             iv.setImageMatrix(mat);
@@ -307,16 +307,17 @@ public class MyActivity extends Activity implements View.OnTouchListener {
                     cursor.close();
 
                     chosenImageColor = BitmapFactory.decodeFile(filePath);
-                    chosenImageGray = grayscale(chosenImageColor);
-                    origin = chosenImageColor.copy(chosenImageColor.getConfig(), true);
+                    if(isBig(chosenImageColor)) {
+                        chosenImageGray = grayscale(chosenImageColor);
+                        origin = chosenImageColor.copy(chosenImageColor.getConfig(), true);
 
-                    theImage.setImageDrawable(new BitmapDrawable(chosenImageColor));
-                    initialPos(theImage);
-                    imgCnt += 1;
-                    fromCamera = false;
+                        theImage.setImageDrawable(new BitmapDrawable(chosenImageColor));
+                        initialPos(theImage);
+                        imgCnt += 1;
+                        fromCamera = false;
+                    }
                     title.setText("");
                     welcome.setText("");
-
                     info.setText("");
                 }
             case CAMERA_DATA :
@@ -538,5 +539,13 @@ public class MyActivity extends Activity implements View.OnTouchListener {
 
     public static Bitmap getOrigin(){
         return origin;
+    }
+
+    public static boolean isBig(Bitmap bitmap){
+        if(bitmap.getWidth()*bitmap.getHeight()>4096*4096){
+            return false;
+        } else {
+            return true;
+        }
     }
 }

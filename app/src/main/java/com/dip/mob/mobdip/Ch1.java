@@ -85,23 +85,36 @@ public class Ch1 extends Fragment {
         seekBar = (SeekBar) getActivity().findViewById(R.id.seekBar);
 
         theImage = (ImageView) getActivity().findViewById(R.id.image);
-        //TODO: NEED to get original image size and adjust seekBar for it
+        int width = ((BitmapDrawable) theImage.getDrawable()).getBitmap().getWidth();
+        int height = ((BitmapDrawable) theImage.getDrawable()).getBitmap().getHeight();
+        int max = 1;
+        //TODO: Make correct ifs (use Bounds)
+        if(width*8<=4096 || height*8<=4096){
+            max = 8;
+        } else if(width*5<=4096 || height*5<=4096){
+            max = 5;
+        } else if(width*2<=4096 || height*2<=4096){
+            max = 2;
+        } else {
+            max = 0;
+            Toast.makeText(getActivity(), "Image is too big to interpolate", Toast.LENGTH_SHORT).show();
+        }
         switch (menuID){
             case 0:
                 currentAction=Action.NN;
-                seekBarInit(8, 1);
+                seekBarInit(max, 1);
                 break;
             case 1:
                 currentAction=Action.BIC;
-                seekBarInit(8, 1);
+                seekBarInit(max, 1);
                 break;
             case 2:
                 currentAction=Action.BIL;
-                seekBarInit(8, 1);
+                seekBarInit(max, 1);
                 break;
             case 3:
                 currentAction=Action.LANC;
-                seekBarInit(8, 1);
+                seekBarInit(max, 1);
                 break;
             case 4:
                 currentAction=Action.BIT;
@@ -172,6 +185,7 @@ public class Ch1 extends Fragment {
                         Utils.matToBitmap(oneBit, resultBmp);
                         drawable = new BitmapDrawable(resultBmp);
                         theImage.setImageDrawable(drawable);
+                        MyActivity.initialPos(theImage);
 
                         break;
                 }
@@ -219,12 +233,18 @@ public class Ch1 extends Fragment {
         } else {
             zoomingFactor=1;
         }
-        Mat resultingImage = new Mat(origImage.rows()*zoomingFactor, origImage.cols()*zoomingFactor, origImage.type());
-        Imgproc.resize(origImage, resultingImage, resultingImage.size(), zoomingFactor, zoomingFactor, interpolation);
-        resultBmp = Bitmap.createBitmap(resultingImage.width(), resultingImage.height(), Bitmap.Config.ARGB_8888);
-        Utils.matToBitmap(resultingImage, resultBmp);
-        drawable = new BitmapDrawable(resultBmp);
-        theImage.setImageDrawable(drawable);
+        if(origImage.rows()*zoomingFactor * origImage.cols()*zoomingFactor>4096*4096){
+            Toast.makeText(getActivity(), "Image is big", Toast.LENGTH_SHORT).show();
+        } else {
+            Mat resultingImage = new Mat(origImage.rows()*zoomingFactor, origImage.cols()*zoomingFactor, origImage.type());
+            Imgproc.resize(origImage, resultingImage, resultingImage.size(), zoomingFactor, zoomingFactor, interpolation);
+            resultBmp = Bitmap.createBitmap(resultingImage.width(), resultingImage.height(), Bitmap.Config.ARGB_8888);
+            Utils.matToBitmap(resultingImage, resultBmp);
+            drawable = new BitmapDrawable(resultBmp);
+            theImage.setImageDrawable(drawable);
+            MyActivity.initialPos(theImage);
+            Toast.makeText(getActivity(), "Image size is: " + resultingImage.size(), Toast.LENGTH_SHORT).show();
+        }
     }
 
 
