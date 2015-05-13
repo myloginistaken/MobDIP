@@ -1,6 +1,8 @@
 package com.dip.mob.mobdip;
 
+import android.app.AlertDialog;
 import android.app.Fragment;
+import android.content.DialogInterface;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
@@ -17,6 +19,7 @@ import android.widget.Toast;
 import org.opencv.android.Utils;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
+import android.graphics.Rect;
 import org.opencv.imgproc.Imgproc;
 
 
@@ -39,6 +42,7 @@ public class Ch1 extends Fragment {
     private Bitmap bitmap, resultBmp, origin;
     private Drawable drawable;
     private View rootView;
+    private int maxSize = 4096;
 
     private enum Action {
         NN, BIC, BIL, LANC, BIT
@@ -87,17 +91,31 @@ public class Ch1 extends Fragment {
         theImage = (ImageView) getActivity().findViewById(R.id.image);
         int width = ((BitmapDrawable) theImage.getDrawable()).getBitmap().getWidth();
         int height = ((BitmapDrawable) theImage.getDrawable()).getBitmap().getHeight();
-        int max = 1;
-        //TODO: Make correct ifs (use Bounds)
-        if(width*8<=4096 || height*8<=4096){
+        int max;
+        //for a small picture the maximum interpolation factor might be 8
+        //for a medium picture the maximum factor is 5
+        //for a large picture the maximum factor is 2
+        //for extremely large picture there is no interpolation
+        if(width*8<=maxSize && height*8<=maxSize){
             max = 8;
-        } else if(width*5<=4096 || height*5<=4096){
+        } else if(width*5<=maxSize && height*5<=maxSize){
             max = 5;
-        } else if(width*2<=4096 || height*2<=4096){
+        } else if(width*2<=maxSize && height*2<=maxSize){
             max = 2;
         } else {
             max = 0;
-            Toast.makeText(getActivity(), "Image is too big to interpolate", Toast.LENGTH_SHORT).show();
+            AlertDialog.Builder builder1 = new AlertDialog.Builder(getActivity());
+            builder1.setMessage("Image is too big to interpolate.");
+            builder1.setCancelable(true);
+            builder1.setPositiveButton("OK",
+                    new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int id) {
+                            dialog.cancel();
+                        }
+                    });
+
+            AlertDialog alert11 = builder1.create();
+            alert11.show();
         }
         switch (menuID){
             case 0:
@@ -233,18 +251,13 @@ public class Ch1 extends Fragment {
         } else {
             zoomingFactor=1;
         }
-        if(origImage.rows()*zoomingFactor * origImage.cols()*zoomingFactor>4096*4096){
-            Toast.makeText(getActivity(), "Image is big", Toast.LENGTH_SHORT).show();
-        } else {
-            Mat resultingImage = new Mat(origImage.rows()*zoomingFactor, origImage.cols()*zoomingFactor, origImage.type());
-            Imgproc.resize(origImage, resultingImage, resultingImage.size(), zoomingFactor, zoomingFactor, interpolation);
-            resultBmp = Bitmap.createBitmap(resultingImage.width(), resultingImage.height(), Bitmap.Config.ARGB_8888);
-            Utils.matToBitmap(resultingImage, resultBmp);
-            drawable = new BitmapDrawable(resultBmp);
-            theImage.setImageDrawable(drawable);
-            MyActivity.initialPos(theImage);
-            Toast.makeText(getActivity(), "Image size is: " + resultingImage.size(), Toast.LENGTH_SHORT).show();
-        }
+        Mat resultingImage = new Mat(origImage.rows()*zoomingFactor, origImage.cols()*zoomingFactor, origImage.type());
+        Imgproc.resize(origImage, resultingImage, resultingImage.size(), zoomingFactor, zoomingFactor, interpolation);
+        resultBmp = Bitmap.createBitmap(resultingImage.width(), resultingImage.height(), Bitmap.Config.ARGB_8888);
+        Utils.matToBitmap(resultingImage, resultBmp);
+        drawable = new BitmapDrawable(resultBmp);
+        theImage.setImageDrawable(drawable);
+        Toast.makeText(getActivity(), "Image size is: " + resultingImage.size(), Toast.LENGTH_SHORT).show();
     }
 
 

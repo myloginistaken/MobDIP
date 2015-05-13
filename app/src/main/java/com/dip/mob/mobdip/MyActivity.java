@@ -541,6 +541,7 @@ public class MyActivity extends Activity implements View.OnTouchListener {
         return origin;
     }
 
+    //perhaps we don't need it
     public static boolean isBig(Bitmap bitmap){
         if(bitmap.getWidth()*bitmap.getHeight()>4096*4096){
             return false;

@@ -40,4 +40,6 @@
         <item>Mich</item>
     </string-array>
 
+    <string name="ok">OK</string>
+
 </resources>
