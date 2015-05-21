@@ -87,35 +87,38 @@ public class Ch1 extends Fragment {
     public void onResume(){
         super.onResume();
         seekBar = (SeekBar) getActivity().findViewById(R.id.seekBar);
-
         theImage = (ImageView) getActivity().findViewById(R.id.image);
-        int width = ((BitmapDrawable) theImage.getDrawable()).getBitmap().getWidth();
-        int height = ((BitmapDrawable) theImage.getDrawable()).getBitmap().getHeight();
-        int max;
-        //for a small picture the maximum interpolation factor might be 8
-        //for a medium picture the maximum factor is 5
-        //for a large picture the maximum factor is 2
-        //for extremely large picture there is no interpolation
-        if(width*8<=maxSize && height*8<=maxSize){
-            max = 8;
-        } else if(width*5<=maxSize && height*5<=maxSize){
-            max = 5;
-        } else if(width*2<=maxSize && height*2<=maxSize){
-            max = 2;
-        } else {
-            max = 0;
-            AlertDialog.Builder builder1 = new AlertDialog.Builder(getActivity());
-            builder1.setMessage("Image is too big to interpolate.");
-            builder1.setCancelable(true);
-            builder1.setPositiveButton("OK",
-                    new DialogInterface.OnClickListener() {
-                        public void onClick(DialogInterface dialog, int id) {
-                            dialog.cancel();
-                        }
-                    });
 
-            AlertDialog alert11 = builder1.create();
-            alert11.show();
+        //check the image size for the interpolations
+        int max = 8;
+        if(menuID!=4) {
+            int width = ((BitmapDrawable) theImage.getDrawable()).getBitmap().getWidth();
+            int height = ((BitmapDrawable) theImage.getDrawable()).getBitmap().getHeight();
+            //for a small picture the maximum interpolation factor might be 8
+            //for a medium picture the maximum factor is 5
+            //for a large picture the maximum factor is 2
+            //for extremely large picture there is no interpolation
+            if (width * 8 <= maxSize && height * 8 <= maxSize) {
+                max = 8;
+            } else if (width * 5 <= maxSize && height * 5 <= maxSize) {
+                max = 5;
+            } else if (width * 2 <= maxSize && height * 2 <= maxSize) {
+                max = 2;
+            } else {
+                max = 1;
+                AlertDialog.Builder builder1 = new AlertDialog.Builder(getActivity());
+                builder1.setMessage("Image is too big to interpolate.");
+                builder1.setCancelable(true);
+                builder1.setPositiveButton("OK",
+                        new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int id) {
+                                dialog.cancel();
+                            }
+                        });
+
+                AlertDialog alert11 = builder1.create();
+                alert11.show();
+            }
         }
         switch (menuID){
             case 0:
@@ -203,7 +206,7 @@ public class Ch1 extends Fragment {
                         Utils.matToBitmap(oneBit, resultBmp);
                         drawable = new BitmapDrawable(resultBmp);
                         theImage.setImageDrawable(drawable);
-                        MyActivity.initialPos(theImage);
+                        //MyActivity.initialPos(theImage);
 
                         break;
                 }

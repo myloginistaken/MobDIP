@@ -240,6 +240,8 @@ public class MyActivity extends Activity implements View.OnTouchListener {
                     android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
             startActivityForResult(toGallery, IMAGE_CHOSEN);
             imageSet = true;
+            // need to onRestoreInstanceState?
+
         }
 
         private void dispatchTakePictureIntent() {
@@ -385,8 +387,6 @@ public class MyActivity extends Activity implements View.OnTouchListener {
         } else {
             theImage.setImageDrawable(new BitmapDrawable(chosenImageColor));
         }
-
-
     }
 
 
