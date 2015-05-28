@@ -35,6 +35,8 @@ public class Ch2 extends Fragment {
     private DrawerLayout layout;
     private Action currentAction;
     private int imgCnt;
+    private double operator = 1;
+    private double min = 0;
 
     private ImageView theImage;
     private Bitmap bitmap, resultBmp;
@@ -80,6 +82,8 @@ public class Ch2 extends Fragment {
 
         switch (menuID) {
             case 0:
+                operator = 1;
+                min = 0;
                 currentAction = Action.POW;
                 seekBar.setProgressDrawable(getResources().getDrawable(R.drawable.progressbar));
                 seekBar.setThumb(getResources().getDrawable(R.drawable.thumb));
@@ -89,6 +93,8 @@ public class Ch2 extends Fragment {
                 imgCnt = MyActivity.getInstance().getImgCnt();
                 break;
             case 1:
+                operator = 0.09;
+                min = 1;
                 currentAction = Action.EXP;
                 seekBar.setProgressDrawable(getResources().getDrawable(R.drawable.progressbar));
                 seekBar.setThumb(getResources().getDrawable(R.drawable.thumb));
@@ -98,6 +104,8 @@ public class Ch2 extends Fragment {
                 imgCnt = MyActivity.getInstance().getImgCnt();
                 break;
             case 2:
+                operator = 1;
+                min = 0;
                 currentAction = Action.LOG;
                 seekBar.setProgressDrawable(getResources().getDrawable(R.drawable.progressbar));
                 seekBar.setThumb(getResources().getDrawable(R.drawable.thumb));
@@ -107,6 +115,8 @@ public class Ch2 extends Fragment {
                 imgCnt = MyActivity.getInstance().getImgCnt();
                 break;
             case 3:
+                operator = 1;
+                min = 0;
                 seekBar.setProgressDrawable(getResources().getDrawable(R.drawable.progressbar));
                 seekBar.setThumb(getResources().getDrawable(R.drawable.thumb));
                 seekBar.setMax(10);
@@ -117,6 +127,8 @@ public class Ch2 extends Fragment {
                 imgCnt = MyActivity.getInstance().getImgCnt();
                 break;
             case 4:
+                operator = 1;
+                min = 0;
                 currentAction = Action.SVD;
 
                 seekBar.setProgressDrawable(getResources().getDrawable(R.drawable.progressbar));
@@ -132,7 +144,7 @@ public class Ch2 extends Fragment {
         seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean b) {
-                seekBarLbl.setText("" + progress/100.0);
+                seekBarLbl.setText("" + (progress/100.0*operator + min ));
                 int seekLblPos = ((((seekBar.getRight() - seekBar.getLeft()) * seekBar.getProgress()) / seekBar.getMax()) + seekBar.getLeft()) - 15;
                 seekBarLbl.setX(seekLblPos);
                 //Toast.makeText(getActivity(), "Progress: " + progress, Toast.LENGTH_SHORT).show();
@@ -198,10 +210,9 @@ public class Ch2 extends Fragment {
                         Utils.bitmapToMat(bitmap, illuSVD);
                         resultBmp = bitmap.copy(Bitmap.Config.ARGB_8888, true);
                         Imgproc.cvtColor(illuSVD, illuSVD, Imgproc.COLOR_RGB2GRAY);
-
-                        //illuminate with progress = n
-
-
+                        illuSVD.convertTo(illuSVD, CvType.CV_32F);
+                        illuSVD = svd(illuSVD);
+                        illuSVD.convertTo(illuSVD, CvType.CV_8U);
                         Utils.matToBitmap(illuSVD, resultBmp);
                         drawable = new BitmapDrawable(resultBmp);
                         theImage.setImageDrawable(drawable);
@@ -261,6 +272,24 @@ public class Ch2 extends Fragment {
             }
         }
         return result;
+    }
+
+    public static Mat svd(Mat image){
+        Mat w = Mat.zeros(image.rows(), image.rows(), image.type());
+        Mat u = Mat.zeros(image.size(), image.type());
+        Mat vt = Mat.zeros(image.cols(), image.cols(), image.type());
+        Mat g = Mat.zeros(image.size(), image.type());
+        Core.SVDecomp(image, w, u, vt);
+        Core.randn(g,0.5,1);
+        Core.MinMaxLocResult max1, max2;
+        max1 = Core.minMaxLoc(g);
+        max2 = Core.minMaxLoc(w);
+        double ksii = max1.maxVal/max2.maxVal;
+        Mat result = new Mat();
+        Core.multiply(w,new Scalar(ksii), w);
+        Core.SVBackSubst(w,u,vt,Mat.ones(image.size(), image.type()),result);
+        return result;
+
     }
 
 
