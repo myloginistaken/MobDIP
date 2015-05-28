@@ -83,7 +83,7 @@ public class Ch2 extends Fragment {
                 currentAction = Action.POW;
                 seekBar.setProgressDrawable(getResources().getDrawable(R.drawable.progressbar));
                 seekBar.setThumb(getResources().getDrawable(R.drawable.thumb));
-                seekBar.setMax(200);
+                seekBar.setMax(500);
                 seekBar.setProgress(100);
                 bitmap = ((BitmapDrawable) theImage.getDrawable()).getBitmap();
                 imgCnt = MyActivity.getInstance().getImgCnt();
@@ -92,8 +92,8 @@ public class Ch2 extends Fragment {
                 currentAction = Action.EXP;
                 seekBar.setProgressDrawable(getResources().getDrawable(R.drawable.progressbar));
                 seekBar.setThumb(getResources().getDrawable(R.drawable.thumb));
-                seekBar.setMax(600);
-                seekBar.setProgress(100);
+                seekBar.setMax(100);
+                seekBar.setProgress(0);
                 bitmap = ((BitmapDrawable) theImage.getDrawable()).getBitmap();
                 imgCnt = MyActivity.getInstance().getImgCnt();
                 break;
@@ -101,16 +101,16 @@ public class Ch2 extends Fragment {
                 currentAction = Action.LOG;
                 seekBar.setProgressDrawable(getResources().getDrawable(R.drawable.progressbar));
                 seekBar.setThumb(getResources().getDrawable(R.drawable.thumb));
-                seekBar.setMax(600);
-                seekBar.setProgress(272);
+                seekBar.setMax(500);
+                seekBar.setProgress(100);
                 bitmap = ((BitmapDrawable) theImage.getDrawable()).getBitmap();
                 imgCnt = MyActivity.getInstance().getImgCnt();
                 break;
             case 3:
                 seekBar.setProgressDrawable(getResources().getDrawable(R.drawable.progressbar));
                 seekBar.setThumb(getResources().getDrawable(R.drawable.thumb));
-                seekBar.setMax(200);
-                seekBar.setProgress(100);
+                seekBar.setMax(10);
+                seekBar.setProgress(0);
 
                 currentAction = Action.HIST;
                 bitmap = ((BitmapDrawable) theImage.getDrawable()).getBitmap();
@@ -121,8 +121,8 @@ public class Ch2 extends Fragment {
 
                 seekBar.setProgressDrawable(getResources().getDrawable(R.drawable.progressbar));
                 seekBar.setThumb(getResources().getDrawable(R.drawable.thumb));
-                seekBar.setMax(200);
-                seekBar.setProgress(100);
+                seekBar.setMax(30);
+                seekBar.setProgress(0);
                 bitmap = ((BitmapDrawable) theImage.getDrawable()).getBitmap();
                 imgCnt = MyActivity.getInstance().getImgCnt();
                 break;
@@ -233,30 +233,31 @@ public class Ch2 extends Fragment {
     public static Mat power(Mat image, double n){
         Mat result = new Mat(image.size(), image.type()) ;
         int m =(int) image.elemSize();
-
-        double [] data = new double[m];
+        double c = 255.0/(Math.pow(255,n));
         Core.pow(image, n, result);
+        Scalar c1 = new Scalar(c);
+        Core.multiply(result, c1, result);
         return result;
     }
 
 
     public static Mat log(Mat image, double n){
         Mat result = new Mat(image.size(), image.type()) ;
-        int m =(int) image.elemSize();
+        double c = Math.log(n)*255.0/(Math.log(255));
         n = 1/Math.log(n);
-        Scalar n2 = new Scalar(n);
+        Scalar n2 = new Scalar(n*c);
         Core.log(image, result);
         Core.multiply(result, n2, result);
         return result;
     }
 
     public static Mat exp(Mat image, double n){
+        n = n*0.09+1.000001;
+        double c = 255.0/(Math.pow(n,255));
         Mat result = new Mat(image.size(), image.type()) ;
-        int m =(int) image.elemSize();
-        n = Math.exp(n);
         for (int i = 0; i<image.rows();i++){
             for (int j = 0; j<image.cols();j++){
-                result.put(i, j, Math.pow(n,image.get(i,j)[0]));
+                result.put(i, j, c*Math.pow(n,image.get(i,j)[0]));
             }
         }
         return result;
