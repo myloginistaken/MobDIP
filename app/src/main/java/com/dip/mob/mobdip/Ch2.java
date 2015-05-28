@@ -85,7 +85,9 @@ public class Ch2 extends Fragment {
                 seekBar.setThumb(getResources().getDrawable(R.drawable.thumb));
                 seekBar.setMax(500);
                 seekBar.setProgress(100);
-                bitmap = ((BitmapDrawable) theImage.getDrawable()).getBitmap();
+                if (theImage.getDrawable()!=null) {
+                    bitmap = ((BitmapDrawable) theImage.getDrawable()).getBitmap();
+                }
                 imgCnt = MyActivity.getInstance().getImgCnt();
                 break;
             case 1:
@@ -94,7 +96,9 @@ public class Ch2 extends Fragment {
                 seekBar.setThumb(getResources().getDrawable(R.drawable.thumb));
                 seekBar.setMax(100);
                 seekBar.setProgress(0);
-                bitmap = ((BitmapDrawable) theImage.getDrawable()).getBitmap();
+                if (theImage.getDrawable()!=null) {
+                    bitmap = ((BitmapDrawable) theImage.getDrawable()).getBitmap();
+                }
                 imgCnt = MyActivity.getInstance().getImgCnt();
                 break;
             case 2:
@@ -103,7 +107,9 @@ public class Ch2 extends Fragment {
                 seekBar.setThumb(getResources().getDrawable(R.drawable.thumb));
                 seekBar.setMax(500);
                 seekBar.setProgress(100);
-                bitmap = ((BitmapDrawable) theImage.getDrawable()).getBitmap();
+                if (theImage.getDrawable()!=null) {
+                    bitmap = ((BitmapDrawable) theImage.getDrawable()).getBitmap();
+                }
                 imgCnt = MyActivity.getInstance().getImgCnt();
                 break;
             case 3:
@@ -111,9 +117,10 @@ public class Ch2 extends Fragment {
                 seekBar.setThumb(getResources().getDrawable(R.drawable.thumb));
                 seekBar.setMax(10);
                 seekBar.setProgress(0);
-
                 currentAction = Action.HIST;
-                bitmap = ((BitmapDrawable) theImage.getDrawable()).getBitmap();
+                if (theImage.getDrawable()!=null) {
+                    bitmap = ((BitmapDrawable) theImage.getDrawable()).getBitmap();
+                }
                 imgCnt = MyActivity.getInstance().getImgCnt();
                 break;
             case 4:
@@ -123,7 +130,9 @@ public class Ch2 extends Fragment {
                 seekBar.setThumb(getResources().getDrawable(R.drawable.thumb));
                 seekBar.setMax(30);
                 seekBar.setProgress(0);
-                bitmap = ((BitmapDrawable) theImage.getDrawable()).getBitmap();
+                if (theImage.getDrawable()!=null) {
+                    bitmap = ((BitmapDrawable) theImage.getDrawable()).getBitmap();
+                }
                 imgCnt = MyActivity.getInstance().getImgCnt();
                 break;
         }
@@ -139,73 +148,66 @@ public class Ch2 extends Fragment {
 
                 switch (currentAction) {
                     case POW:
-                        // Interpolate by the factor of progress
-                        Mat illuPOW = new Mat();
-                        Utils.bitmapToMat(bitmap, illuPOW);
-                        resultBmp = bitmap.copy(Bitmap.Config.ARGB_8888, true);
-                        Imgproc.cvtColor(illuPOW, illuPOW, Imgproc.COLOR_RGB2GRAY);
-                        illuPOW.convertTo(illuPOW, CvType.CV_32F);
-                        //illuminate with progress = n
+                        if (bitmap!=null) {
+                            // Interpolate by the factor of progress
+                            Mat illuPOW = new Mat();
+                            Utils.bitmapToMat(bitmap, illuPOW);
+                            resultBmp = bitmap.copy(Bitmap.Config.ARGB_8888, true);
+                            Imgproc.cvtColor(illuPOW, illuPOW, Imgproc.COLOR_RGB2GRAY);
+                            illuPOW.convertTo(illuPOW, CvType.CV_32F);
+                            //illuminate with progress = n
 
-                        illuPOW = power(illuPOW,progress/100.0);
-                        illuPOW.convertTo(illuPOW, CvType.CV_8U);
-                        Utils.matToBitmap(illuPOW, resultBmp);
-                        drawable = new BitmapDrawable(resultBmp);
-                        theImage.setImageDrawable(drawable);
+                            illuPOW = power(illuPOW, progress / 100.0);
+                            illuPOW.convertTo(illuPOW, CvType.CV_8U);
+                            Utils.matToBitmap(illuPOW, resultBmp);
+                            drawable = new BitmapDrawable(resultBmp);
+                            theImage.setImageDrawable(drawable);
+                        }
                         break;
                     case HIST:
-                        Mat illuHIST = new Mat();
-                        Utils.bitmapToMat(bitmap, illuHIST);
-                        resultBmp = bitmap.copy(Bitmap.Config.ARGB_8888, true);
-                        Imgproc.cvtColor(illuHIST, illuHIST, Imgproc.COLOR_RGB2GRAY);
-                        //illuminate with progress = n
-                        // illuHIST.convertTo(illuHIST, CvType.CV_8UC1);
-                        Imgproc.equalizeHist(illuHIST,illuHIST);
-                        Utils.matToBitmap(illuHIST, resultBmp);
-                        drawable = new BitmapDrawable(resultBmp);
-                        theImage.setImageDrawable(drawable);
+                        if (bitmap!=null) {
+                            Mat illuHIST = new Mat();
+                            Utils.bitmapToMat(bitmap, illuHIST);
+                            resultBmp = bitmap.copy(Bitmap.Config.ARGB_8888, true);
+                            Imgproc.cvtColor(illuHIST, illuHIST, Imgproc.COLOR_RGB2GRAY);
+                            //illuminate with progress = n
+                            // illuHIST.convertTo(illuHIST, CvType.CV_8UC1);
+                            Imgproc.equalizeHist(illuHIST, illuHIST);
+                            Utils.matToBitmap(illuHIST, resultBmp);
+                            drawable = new BitmapDrawable(resultBmp);
+                            theImage.setImageDrawable(drawable);
+                        }
                         break;
                     case EXP:
-                        // Interpolate by the factor of progress
-                        Mat illuEXP = new Mat();
-                        Utils.bitmapToMat(bitmap, illuEXP);
-                        resultBmp = bitmap.copy(Bitmap.Config.ARGB_8888, true);
-                        Imgproc.cvtColor(illuEXP, illuEXP, Imgproc.COLOR_RGB2GRAY);
-                        illuEXP.convertTo(illuEXP, CvType.CV_32F);
-                        //illuminate with progress = n
-                        illuEXP = exp(illuEXP,progress/100.0);
-                        illuEXP.convertTo(illuEXP, CvType.CV_8U);
-                        Utils.matToBitmap(illuEXP, resultBmp);
-                        drawable = new BitmapDrawable(resultBmp);
-                        theImage.setImageDrawable(drawable);
+                        if (bitmap!=null) {
+                            // Interpolate by the factor of progress
+                            Mat illuEXP = new Mat();
+                            Utils.bitmapToMat(bitmap, illuEXP);
+                            resultBmp = bitmap.copy(Bitmap.Config.ARGB_8888, true);
+                            Imgproc.cvtColor(illuEXP, illuEXP, Imgproc.COLOR_RGB2GRAY);
+                            illuEXP.convertTo(illuEXP, CvType.CV_32F);
+                            //illuminate with progress = n
+                            illuEXP = exp(illuEXP, progress / 100.0);
+                            illuEXP.convertTo(illuEXP, CvType.CV_8U);
+                            Utils.matToBitmap(illuEXP, resultBmp);
+                            drawable = new BitmapDrawable(resultBmp);
+                            theImage.setImageDrawable(drawable);
+                        }
                         break;
                     case LOG:
-                        // Interpolate by the factor of progress
-                        Mat illuLOG = new Mat();
-                        Utils.bitmapToMat(bitmap, illuLOG);
-                        resultBmp = bitmap.copy(Bitmap.Config.ARGB_8888, true);
-                        Imgproc.cvtColor(illuLOG, illuLOG, Imgproc.COLOR_RGB2GRAY);
-                        illuLOG.convertTo(illuLOG, CvType.CV_32F);
-                        illuLOG = log(illuLOG,progress/100.0);
-                        illuLOG.convertTo(illuLOG, CvType.CV_8U);
-                        Utils.matToBitmap(illuLOG, resultBmp);
-                        drawable = new BitmapDrawable(resultBmp);
-                        theImage.setImageDrawable(drawable);
-                        break;
-                    case SVD:
-                        //do some more
-                        Mat illuSVD = new Mat();
-                        Utils.bitmapToMat(bitmap, illuSVD);
-                        resultBmp = bitmap.copy(Bitmap.Config.ARGB_8888, true);
-                        Imgproc.cvtColor(illuSVD, illuSVD, Imgproc.COLOR_RGB2GRAY);
-
-                        //illuminate with progress = n
-
-
-                        Utils.matToBitmap(illuSVD, resultBmp);
-                        drawable = new BitmapDrawable(resultBmp);
-                        theImage.setImageDrawable(drawable);
-
+                        if (bitmap!=null) {
+                            // Interpolate by the factor of progress
+                            Mat illuLOG = new Mat();
+                            Utils.bitmapToMat(bitmap, illuLOG);
+                            resultBmp = bitmap.copy(Bitmap.Config.ARGB_8888, true);
+                            Imgproc.cvtColor(illuLOG, illuLOG, Imgproc.COLOR_RGB2GRAY);
+                            illuLOG.convertTo(illuLOG, CvType.CV_32F);
+                            illuLOG = log(illuLOG, progress / 100.0);
+                            illuLOG.convertTo(illuLOG, CvType.CV_8U);
+                            Utils.matToBitmap(illuLOG, resultBmp);
+                            drawable = new BitmapDrawable(resultBmp);
+                            theImage.setImageDrawable(drawable);
+                        }
                         break;
                 }
 
@@ -214,7 +216,7 @@ public class Ch2 extends Fragment {
             @Override
             public void onStartTrackingTouch(SeekBar seekBar) {
                 int currentImgCnt = MyActivity.getInstance().getImgCnt();
-                if (imgCnt != currentImgCnt) {
+                if (imgCnt != currentImgCnt && theImage.getDrawable()!=null) {
                     bitmap = ((BitmapDrawable) theImage.getDrawable()).getBitmap();
                     imgCnt = currentImgCnt;
                 }

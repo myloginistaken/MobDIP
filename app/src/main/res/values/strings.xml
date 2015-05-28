@@ -15,7 +15,7 @@
     <string-array name="nav_drawer_groups">
         <item>Zooming and Quantization</item>
         <item>Illumination Enhancement</item>
-        <item>The Third One</item>
+        <item>To be developed</item>
     </string-array>
 
     <string-array name="nav_drawer_kids1">
@@ -31,13 +31,12 @@
         <item>Exponential</item>
         <item>Logarithmic</item>
         <item>Histogram Equalization</item>
-        <item>Singular Value Equalization</item>
     </string-array>
 
     <string-array name="nav_drawer_kids3">
-        <item>Do</item>
-        <item>Hast</item>
-        <item>Mich</item>
+        <item>To</item>
+        <item>be</item>
+        <item>developed</item>
     </string-array>
 
     <string name="ok">OK</string>

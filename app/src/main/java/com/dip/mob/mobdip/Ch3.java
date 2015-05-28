@@ -28,7 +28,7 @@ public class Ch3 extends Fragment {
         bundle = getArguments();
         menuID = bundle.getInt("childPosition");
         title = (TextView) getActivity().findViewById(R.id.textView);
-        title.setText(getResources().getStringArray(R.array.nav_drawer_kids1)[menuID]);
+        //title.setText(getResources().getStringArray(R.array.nav_drawer_kids1)[menuID]);
         title = (TextView) getActivity().findViewById(R.id.textView2);
         title.setText("");
 
