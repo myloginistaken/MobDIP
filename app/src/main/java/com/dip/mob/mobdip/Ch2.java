@@ -93,7 +93,7 @@ public class Ch2 extends Fragment {
                 seekBar.setProgressDrawable(getResources().getDrawable(R.drawable.progressbar));
                 seekBar.setThumb(getResources().getDrawable(R.drawable.thumb));
                 seekBar.setMax(600);
-                seekBar.setProgress(272);
+                seekBar.setProgress(100);
                 bitmap = ((BitmapDrawable) theImage.getDrawable()).getBitmap();
                 imgCnt = MyActivity.getInstance().getImgCnt();
                 break;
@@ -101,8 +101,8 @@ public class Ch2 extends Fragment {
                 currentAction = Action.LOG;
                 seekBar.setProgressDrawable(getResources().getDrawable(R.drawable.progressbar));
                 seekBar.setThumb(getResources().getDrawable(R.drawable.thumb));
-                seekBar.setMax(200);
-                seekBar.setProgress(100);
+                seekBar.setMax(600);
+                seekBar.setProgress(272);
                 bitmap = ((BitmapDrawable) theImage.getDrawable()).getBitmap();
                 imgCnt = MyActivity.getInstance().getImgCnt();
                 break;
@@ -252,7 +252,7 @@ public class Ch2 extends Fragment {
 
     public static Mat exp(Mat image, double n){
         Mat result = new Mat(image.size(), image.type()) ;
-        int m =(int) image.elemSize(); 
+        int m =(int) image.elemSize();
         n = Math.exp(n);
         for (int i = 0; i<image.rows();i++){
             for (int j = 0; j<image.cols();j++){
