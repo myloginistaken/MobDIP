@@ -91,7 +91,7 @@ public class Ch1 extends Fragment {
 
         //check the image size for the interpolations
         int max = 8;
-        if(menuID!=4) {
+        if(menuID!=4 && theImage.getDrawable()!=null) {
             int width = ((BitmapDrawable) theImage.getDrawable()).getBitmap().getWidth();
             int height = ((BitmapDrawable) theImage.getDrawable()).getBitmap().getHeight();
             //for a small picture the maximum interpolation factor might be 8
@@ -171,43 +171,44 @@ public class Ch1 extends Fragment {
                         interpolate(progress, Imgproc.INTER_LANCZOS4);
                         break;
                     case BIT:
-                        Mat oneBit = new Mat();
-                        Utils.bitmapToMat(bitmap, oneBit);
-                        resultBmp = bitmap.copy(Bitmap.Config.ARGB_8888, true);
-                        Imgproc.cvtColor(oneBit, oneBit, Imgproc.COLOR_RGB2GRAY);
-                        oneBit.convertTo(oneBit, CvType.CV_32S);
-                        int size = (int) (oneBit.total()*oneBit.channels());
+                        if (bitmap!=null) {
+                            Mat oneBit = new Mat();
+                            Utils.bitmapToMat(bitmap, oneBit);
+                            resultBmp = bitmap.copy(Bitmap.Config.ARGB_8888, true);
+                            Imgproc.cvtColor(oneBit, oneBit, Imgproc.COLOR_RGB2GRAY);
+                            oneBit.convertTo(oneBit, CvType.CV_32S);
+                            int size = (int) (oneBit.total() * oneBit.channels());
 
-                        int[] temp = new int[size];
+                            int[] temp = new int[size];
 
-                        oneBit.get(0,0,temp);
-                        // 1-8 bit representations
-                        if (progress<2){
-                            int[] result = bitPlaneSlice(temp, size, 1);
-                            oneBit.put(0,0,result);
-                        }else if (progress>=2 && progress<3){
-                            int[] result = bitPlaneSlice(temp, size, 2);
-                            oneBit.put(0,0,result);
-                        }else if (progress<4){
-                            int[] result = bitPlaneSlice(temp, size, 3);
-                            oneBit.put(0,0,result);
-                        }else if (progress<5){
-                            int[] result = bitPlaneSlice(temp, size, 4);
-                            oneBit.put(0,0,result);
-                        }else if (progress<6){
-                            int[] result = bitPlaneSlice(temp, size, 5);
-                            oneBit.put(0,0,result);
-                        }else if (progress<7){
-                            int[] result = bitPlaneSlice(temp, size, 6);
-                            oneBit.put(0,0,result);
+                            oneBit.get(0, 0, temp);
+                            // 1-8 bit representations
+                            if (progress < 2) {
+                                int[] result = bitPlaneSlice(temp, size, 1);
+                                oneBit.put(0, 0, result);
+                            } else if (progress >= 2 && progress < 3) {
+                                int[] result = bitPlaneSlice(temp, size, 2);
+                                oneBit.put(0, 0, result);
+                            } else if (progress < 4) {
+                                int[] result = bitPlaneSlice(temp, size, 3);
+                                oneBit.put(0, 0, result);
+                            } else if (progress < 5) {
+                                int[] result = bitPlaneSlice(temp, size, 4);
+                                oneBit.put(0, 0, result);
+                            } else if (progress < 6) {
+                                int[] result = bitPlaneSlice(temp, size, 5);
+                                oneBit.put(0, 0, result);
+                            } else if (progress < 7) {
+                                int[] result = bitPlaneSlice(temp, size, 6);
+                                oneBit.put(0, 0, result);
+                            }
+
+                            oneBit.convertTo(oneBit, CvType.CV_8UC1);
+                            Utils.matToBitmap(oneBit, resultBmp);
+                            drawable = new BitmapDrawable(resultBmp);
+                            theImage.setImageDrawable(drawable);
+                            //MyActivity.initialPos(theImage);
                         }
-
-                        oneBit.convertTo(oneBit, CvType.CV_8UC1);
-                        Utils.matToBitmap(oneBit, resultBmp);
-                        drawable = new BitmapDrawable(resultBmp);
-                        theImage.setImageDrawable(drawable);
-                        //MyActivity.initialPos(theImage);
-
                         break;
                 }
 
@@ -216,7 +217,7 @@ public class Ch1 extends Fragment {
             @Override
             public void onStartTrackingTouch(SeekBar seekBar) {
                 int currentImgCnt = MyActivity.getInstance().getImgCnt();
-                if(imgCnt!=currentImgCnt){
+                if(imgCnt!=currentImgCnt && theImage.getDrawable()!=null){
                     bitmap = ((BitmapDrawable) theImage.getDrawable()).getBitmap();
                     imgCnt = currentImgCnt;
                 }
@@ -238,29 +239,33 @@ public class Ch1 extends Fragment {
         seekBar.setThumb(getResources().getDrawable(R.drawable.thumb));
         seekBar.setMax(max);
         seekBar.setProgress(current);
-        bitmap = ((BitmapDrawable) theImage.getDrawable()).getBitmap();
+        if (theImage.getDrawable()!=null) {
+            bitmap = ((BitmapDrawable) theImage.getDrawable()).getBitmap();
+        }
         imgCnt = MyActivity.getInstance().getImgCnt();
     }
 
     private void interpolate(int seekBarProg, int interpolation){
-        //restore the original image
-        Mat origImage = new Mat();
-        Utils.bitmapToMat(origin, origImage);
-        theImage.setImageDrawable(new BitmapDrawable(origin));
+        if (origin!=null) {
+            //restore the original image
+            Mat origImage = new Mat();
+            Utils.bitmapToMat(origin, origImage);
+            theImage.setImageDrawable(new BitmapDrawable(origin));
 
-        int zoomingFactor;
-        if (seekBarProg>0) {
-            zoomingFactor = seekBarProg;
-        } else {
-            zoomingFactor=1;
+            int zoomingFactor;
+            if (seekBarProg > 0) {
+                zoomingFactor = seekBarProg;
+            } else {
+                zoomingFactor = 1;
+            }
+            Mat resultingImage = new Mat(origImage.rows() * zoomingFactor, origImage.cols() * zoomingFactor, origImage.type());
+            Imgproc.resize(origImage, resultingImage, resultingImage.size(), zoomingFactor, zoomingFactor, interpolation);
+            resultBmp = Bitmap.createBitmap(resultingImage.width(), resultingImage.height(), Bitmap.Config.ARGB_8888);
+            Utils.matToBitmap(resultingImage, resultBmp);
+            drawable = new BitmapDrawable(resultBmp);
+            theImage.setImageDrawable(drawable);
+            Toast.makeText(getActivity(), "Image size is: " + resultingImage.size(), Toast.LENGTH_SHORT).show();
         }
-        Mat resultingImage = new Mat(origImage.rows()*zoomingFactor, origImage.cols()*zoomingFactor, origImage.type());
-        Imgproc.resize(origImage, resultingImage, resultingImage.size(), zoomingFactor, zoomingFactor, interpolation);
-        resultBmp = Bitmap.createBitmap(resultingImage.width(), resultingImage.height(), Bitmap.Config.ARGB_8888);
-        Utils.matToBitmap(resultingImage, resultBmp);
-        drawable = new BitmapDrawable(resultBmp);
-        theImage.setImageDrawable(drawable);
-        Toast.makeText(getActivity(), "Image size is: " + resultingImage.size(), Toast.LENGTH_SHORT).show();
     }
 
 

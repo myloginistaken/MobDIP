@@ -1,5 +1,6 @@
 package com.dip.mob.mobdip;
 
+import android.app.ActionBar;
 import android.app.Activity;
 import android.app.Fragment;
 import android.app.FragmentManager;
@@ -21,6 +22,8 @@ import android.provider.MediaStore;
 import android.support.v4.widget.DrawerLayout;
 import android.util.Log;
 import android.util.TypedValue;
+import android.view.Gravity;
+import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ext.SatelliteMenu;
@@ -28,6 +31,7 @@ import android.view.ext.SatelliteMenuItem;
 import android.widget.Button;
 import android.widget.ExpandableListView;
 import android.widget.ImageView;
+import android.widget.PopupWindow;
 import android.widget.RelativeLayout;
 import android.widget.SeekBar;
 import android.widget.TextView;
@@ -64,7 +68,7 @@ public class MyActivity extends Activity implements View.OnTouchListener {
     private static Bitmap origin;
     private static final int IMAGE_CHOSEN = 1;
     private int imgCnt = 0;
-    private TextView title, welcome, info;
+    private TextView title, welcome;
 
     private static final int CAMERA_DATA = 2;
     private Uri outputFileUri;
@@ -99,6 +103,9 @@ public class MyActivity extends Activity implements View.OnTouchListener {
 
 
     private RelativeLayout relativeLayout;
+    private PopupWindow info;
+    private View infopopup;
+    private LayoutInflater li;
 
     // Chapter 1 selected onCreate by default
     //NO!
@@ -117,8 +124,17 @@ public class MyActivity extends Activity implements View.OnTouchListener {
         start = new PointF();
         middle = new PointF();
 
+        li = (LayoutInflater) getBaseContext().getSystemService(LAYOUT_INFLATER_SERVICE);
+
+        infopopup = li.inflate(R.layout.info_popup, null);
+
+        info = new PopupWindow(infopopup, ActionBar.LayoutParams.WRAP_CONTENT, ActionBar.LayoutParams.WRAP_CONTENT);
+        info.setFocusable(true);
+        info.setOutsideTouchable(true);
+        info.setBackgroundDrawable(new BitmapDrawable(getResources(),""));
+
         mTitle = mDrawerTitle = getTitle();
-        info = (TextView) findViewById(R.id.textView3);
+        //info = (TextView) findViewById(R.id.textView3);
 
         // load slide menu items
         navMenuTitles = getResources().getStringArray(R.array.nav_drawer_groups);
@@ -181,10 +197,13 @@ public class MyActivity extends Activity implements View.OnTouchListener {
                     case 4:
                         dispatchTakePictureIntent();
                         break;
-                    case 6:
-                        break;
                     case 7:
-                        info.setText(getResources().getString(R.string.textInfo));
+                        info.showAtLocation(mDrawerLayout, Gravity.CENTER, 0, 0);
+                        break;
+
+
+
+                        //info.setText(getResources().getString(R.string.textInfo));
                 }
                 //Toast.makeText(MyActivity.this, "Clicked on " + id, Toast.LENGTH_SHORT).show();
             }
@@ -320,7 +339,6 @@ public class MyActivity extends Activity implements View.OnTouchListener {
                     }
                     title.setText("");
                     welcome.setText("");
-                    info.setText("");
                 }
             case CAMERA_DATA :
                 if (requestCode == CAMERA_DATA){
@@ -356,7 +374,6 @@ public class MyActivity extends Activity implements View.OnTouchListener {
                     }
                     title.setText("");
                     welcome.setText("");
-                    info.setText("");
                 }
         }
     }
