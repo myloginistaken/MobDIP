@@ -6,10 +6,12 @@
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:padding="20dp"
         android:textAppearance="?android:attr/textAppearanceMedium"
         android:id="@+id/textView"
-        android:text="This is info text for popup i wonder how big can it be MobDIP v1"
-        android:layout_gravity="center_horizontal|top"
-        android:layout_marginTop="33dp" />
+        android:text="@string/textInfo"
+        android:textColor="#000"
+        android:background="@color/white"
+        android:layout_gravity="center|top" />
 
 </LinearLayout>

@@ -7,8 +7,7 @@
     <!-- MAIN MENU -->
     <string name="upload">Upload image</string>
     <string name="camera">Take photo</string>
-    <string name="textInfo">This app has been developed by a magic trio in order to illustrate different image processing
-        techniques learnt in the course Digital Image Processing</string>
+    <string name="textInfo">MobDIP is an awesome mobile image processing tool.\n\nDeveloped by:\nAnton Prokopov, Iiris Lüsi,\nAnastasia Bolotnikova.\n\nVersion: 0.1.\nDigital Image Processing.\nUniversity of Tartu, Estonia.</string>
     <string name="welcome">Welcome to Digital Image Processing App</string>
 
     <!-- Nav Drawer Menu Items -->
