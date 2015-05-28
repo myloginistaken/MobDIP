@@ -14,8 +14,11 @@ import android.widget.SeekBar;
 import android.widget.TextView;
 
 import org.opencv.android.Utils;
+import org.opencv.core.Core;
+import org.opencv.core.CvType;
 import org.opencv.core.Mat;
 import org.opencv.imgproc.Imgproc;
+import org.opencv.core.Scalar;
 
 /**
  * Created by anton on 26.02.15.
@@ -141,10 +144,11 @@ public class Ch2 extends Fragment {
                         Utils.bitmapToMat(bitmap, illuPOW);
                         resultBmp = bitmap.copy(Bitmap.Config.ARGB_8888, true);
                         Imgproc.cvtColor(illuPOW, illuPOW, Imgproc.COLOR_RGB2GRAY);
-
+                        illuPOW.convertTo(illuPOW, CvType.CV_32F);
                         //illuminate with progress = n
 
                         illuPOW = power(illuPOW,progress/100.0);
+                        illuPOW.convertTo(illuPOW, CvType.CV_8U);
                         Utils.matToBitmap(illuPOW, resultBmp);
                         drawable = new BitmapDrawable(resultBmp);
                         theImage.setImageDrawable(drawable);
@@ -167,9 +171,10 @@ public class Ch2 extends Fragment {
                         Utils.bitmapToMat(bitmap, illuEXP);
                         resultBmp = bitmap.copy(Bitmap.Config.ARGB_8888, true);
                         Imgproc.cvtColor(illuEXP, illuEXP, Imgproc.COLOR_RGB2GRAY);
-
+                        illuEXP.convertTo(illuEXP, CvType.CV_32F);
                         //illuminate with progress = n
                         illuEXP = exp(illuEXP,progress/100.0);
+                        illuEXP.convertTo(illuEXP, CvType.CV_8U);
                         Utils.matToBitmap(illuEXP, resultBmp);
                         drawable = new BitmapDrawable(resultBmp);
                         theImage.setImageDrawable(drawable);
@@ -180,7 +185,9 @@ public class Ch2 extends Fragment {
                         Utils.bitmapToMat(bitmap, illuLOG);
                         resultBmp = bitmap.copy(Bitmap.Config.ARGB_8888, true);
                         Imgproc.cvtColor(illuLOG, illuLOG, Imgproc.COLOR_RGB2GRAY);
+                        illuLOG.convertTo(illuLOG, CvType.CV_32F);
                         illuLOG = log(illuLOG,progress/100.0);
+                        illuLOG.convertTo(illuLOG, CvType.CV_8U);
                         Utils.matToBitmap(illuLOG, resultBmp);
                         drawable = new BitmapDrawable(resultBmp);
                         theImage.setImageDrawable(drawable);
@@ -228,15 +235,7 @@ public class Ch2 extends Fragment {
         int m =(int) image.elemSize();
 
         double [] data = new double[m];
-
-        for (int i = 0; i<image.rows();i++){
-            for (int j = 0; j<image.cols();j++){
-                for(int k = 0; k<m;k++){
-                    data[k] = Math.pow(image.get(i,j)[k],n);
-                }
-                result.put(i, j, data);
-            }
-        }
+        Core.pow(image, n, result);
         return result;
     }
 
@@ -244,32 +243,20 @@ public class Ch2 extends Fragment {
     public static Mat log(Mat image, double n){
         Mat result = new Mat(image.size(), image.type()) ;
         int m =(int) image.elemSize();
-
-        double [] data = new double[m];
-
-        for (int i = 0; i<image.rows();i++){
-            for (int j = 0; j<image.cols();j++){
-                for(int k = 0; k<m;k++){
-                    data[k] = Math.log(image.get(i,j)[k])/Math.log(n);
-                }
-                result.put(i, j, data);
-            }
-        }
+        n = 1/Math.log(n);
+        Scalar n2 = new Scalar(n);
+        Core.log(image, result);
+        Core.multiply(result, n2, result);
         return result;
     }
 
     public static Mat exp(Mat image, double n){
         Mat result = new Mat(image.size(), image.type()) ;
-        int m =(int) image.elemSize();
-
-        double [] data = new double[m];
-
+        int m =(int) image.elemSize(); 
+        n = Math.exp(n);
         for (int i = 0; i<image.rows();i++){
             for (int j = 0; j<image.cols();j++){
-                for(int k = 0; k<m;k++){
-                    data[k] = Math.pow(n,image.get(i,j)[k]);
-                }
-                result.put(i, j, data);
+                result.put(i, j, Math.pow(n,image.get(i,j)[0]));
             }
         }
         return result;
