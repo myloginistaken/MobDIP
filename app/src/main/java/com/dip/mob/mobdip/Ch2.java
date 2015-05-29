@@ -113,7 +113,7 @@ public class Ch2 extends Fragment {
                 currentAction = Action.LOG;
                 seekBar.setProgressDrawable(getResources().getDrawable(R.drawable.progressbar));
                 seekBar.setThumb(getResources().getDrawable(R.drawable.thumb));
-                seekBar.setMax(500);
+                seekBar.setMax(1000);
                 seekBar.setProgress(100);
                 seekBar.setVisibility(View.VISIBLE);
                 seekBarLbl.setVisibility(View.VISIBLE);
@@ -232,11 +232,16 @@ public class Ch2 extends Fragment {
 
     public static Mat log(Mat image, double n){
         Mat result = new Mat(image.size(), image.type()) ;
-        double c = Math.log(n)*255.0/(Math.log(255));
-        n = 1/Math.log(n);
-        Scalar n2 = new Scalar(n*c);
-        Core.log(image, result);
-        Core.multiply(result, n2, result);
+        Core.MinMaxLocResult max = Core.minMaxLoc(image);
+       // double c = 255.0/Math.log(256)/Math.log(n);
+        double c = 52;
+        for (int i = 0; i<image.rows();i++){
+            for (int j = 0; j<image.cols();j++){
+                result.put(i, j, c*Math.log(image.get(i, j)[0] + 1)/Math.log(n));
+            }
+        }
+
+
         return result;
     }
 
