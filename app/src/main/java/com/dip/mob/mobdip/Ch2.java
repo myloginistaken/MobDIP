@@ -89,6 +89,8 @@ public class Ch2 extends Fragment {
                 seekBar.setThumb(getResources().getDrawable(R.drawable.thumb));
                 seekBar.setMax(500);
                 seekBar.setProgress(100);
+                seekBar.setVisibility(View.VISIBLE);
+                seekBarLbl.setVisibility(View.VISIBLE);
                 bitmap = ((BitmapDrawable) theImage.getDrawable()).getBitmap();
                 imgCnt = MyActivity.getInstance().getImgCnt();
                 break;
@@ -100,6 +102,8 @@ public class Ch2 extends Fragment {
                 seekBar.setThumb(getResources().getDrawable(R.drawable.thumb));
                 seekBar.setMax(100);
                 seekBar.setProgress(0);
+                seekBar.setVisibility(View.VISIBLE);
+                seekBarLbl.setVisibility(View.VISIBLE);
                 bitmap = ((BitmapDrawable) theImage.getDrawable()).getBitmap();
                 imgCnt = MyActivity.getInstance().getImgCnt();
                 break;
@@ -111,6 +115,8 @@ public class Ch2 extends Fragment {
                 seekBar.setThumb(getResources().getDrawable(R.drawable.thumb));
                 seekBar.setMax(500);
                 seekBar.setProgress(100);
+                seekBar.setVisibility(View.VISIBLE);
+                seekBarLbl.setVisibility(View.VISIBLE);
                 bitmap = ((BitmapDrawable) theImage.getDrawable()).getBitmap();
                 imgCnt = MyActivity.getInstance().getImgCnt();
                 break;
@@ -121,22 +127,20 @@ public class Ch2 extends Fragment {
                 seekBar.setThumb(getResources().getDrawable(R.drawable.thumb));
                 seekBar.setMax(10);
                 seekBar.setProgress(0);
-
-                currentAction = Action.HIST;
+                seekBar.setVisibility(View.INVISIBLE);
+                seekBarLbl.setVisibility(View.INVISIBLE);
                 bitmap = ((BitmapDrawable) theImage.getDrawable()).getBitmap();
                 imgCnt = MyActivity.getInstance().getImgCnt();
-                break;
-            case 4:
-                operator = 1;
-                min = 0;
-                currentAction = Action.SVD;
-
-                seekBar.setProgressDrawable(getResources().getDrawable(R.drawable.progressbar));
-                seekBar.setThumb(getResources().getDrawable(R.drawable.thumb));
-                seekBar.setMax(30);
-                seekBar.setProgress(0);
-                bitmap = ((BitmapDrawable) theImage.getDrawable()).getBitmap();
-                imgCnt = MyActivity.getInstance().getImgCnt();
+                Mat illuHIST = new Mat();
+                Utils.bitmapToMat(bitmap, illuHIST);
+                resultBmp = bitmap.copy(Bitmap.Config.ARGB_8888, true);
+                Imgproc.cvtColor(illuHIST, illuHIST, Imgproc.COLOR_RGB2GRAY);
+                //illuminate with progress = n
+                // illuHIST.convertTo(illuHIST, CvType.CV_8UC1);
+                Imgproc.equalizeHist(illuHIST,illuHIST);
+                Utils.matToBitmap(illuHIST, resultBmp);
+                drawable = new BitmapDrawable(resultBmp);
+                theImage.setImageDrawable(drawable);
                 break;
         }
 
@@ -162,18 +166,6 @@ public class Ch2 extends Fragment {
                         illuPOW = power(illuPOW,progress/100.0);
                         illuPOW.convertTo(illuPOW, CvType.CV_8U);
                         Utils.matToBitmap(illuPOW, resultBmp);
-                        drawable = new BitmapDrawable(resultBmp);
-                        theImage.setImageDrawable(drawable);
-                        break;
-                    case HIST:
-                        Mat illuHIST = new Mat();
-                        Utils.bitmapToMat(bitmap, illuHIST);
-                        resultBmp = bitmap.copy(Bitmap.Config.ARGB_8888, true);
-                        Imgproc.cvtColor(illuHIST, illuHIST, Imgproc.COLOR_RGB2GRAY);
-                        //illuminate with progress = n
-                        // illuHIST.convertTo(illuHIST, CvType.CV_8UC1);
-                        Imgproc.equalizeHist(illuHIST,illuHIST);
-                        Utils.matToBitmap(illuHIST, resultBmp);
                         drawable = new BitmapDrawable(resultBmp);
                         theImage.setImageDrawable(drawable);
                         break;
@@ -203,20 +195,6 @@ public class Ch2 extends Fragment {
                         Utils.matToBitmap(illuLOG, resultBmp);
                         drawable = new BitmapDrawable(resultBmp);
                         theImage.setImageDrawable(drawable);
-                        break;
-                    case SVD:
-                        //do some more
-                        Mat illuSVD = new Mat();
-                        Utils.bitmapToMat(bitmap, illuSVD);
-                        resultBmp = bitmap.copy(Bitmap.Config.ARGB_8888, true);
-                        Imgproc.cvtColor(illuSVD, illuSVD, Imgproc.COLOR_RGB2GRAY);
-                        illuSVD.convertTo(illuSVD, CvType.CV_32F);
-                        illuSVD = svd(illuSVD);
-                        illuSVD.convertTo(illuSVD, CvType.CV_8U);
-                        Utils.matToBitmap(illuSVD, resultBmp);
-                        drawable = new BitmapDrawable(resultBmp);
-                        theImage.setImageDrawable(drawable);
-
                         break;
                 }
 
@@ -273,25 +251,6 @@ public class Ch2 extends Fragment {
         }
         return result;
     }
-
-    public static Mat svd(Mat image){
-        Mat w = Mat.zeros(image.rows(), image.rows(), image.type());
-        Mat u = Mat.zeros(image.size(), image.type());
-        Mat vt = Mat.zeros(image.cols(), image.cols(), image.type());
-        Mat g = Mat.zeros(image.size(), image.type());
-        Core.SVDecomp(image, w, u, vt);
-        Core.randn(g,0.5,1);
-        Core.MinMaxLocResult max1, max2;
-        max1 = Core.minMaxLoc(g);
-        max2 = Core.minMaxLoc(w);
-        double ksii = max1.maxVal/max2.maxVal;
-        Mat result = new Mat();
-        Core.multiply(w,new Scalar(ksii), w);
-        Core.SVBackSubst(w,u,vt,Mat.ones(image.size(), image.type()),result);
-        return result;
-
-    }
-
 
 }
 
